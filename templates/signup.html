@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block content %}
+<h1>
+    <b>Sign Up Now</b> 
+</h1>
+<form action="/signup",method="post">
+    <div>
+        <label for="name"> Name : </label>
+        <input name="username" type="text" id="name" required>
+    </div>
+    <div>
+        <label for="email"> Email : </label>
+        <input name="email" type="email" id="email" required>
+    </div>
+    <div>
+        <label for="Location">Location : </label>
+        <input name="location" type="text" id="Location"> 
+    </div>
+    <div>
+        <label for="password">Password : </label>
+        <input name="password" type="password" id="password" required>
+    </div>
+    <button type="submit">Create an account</button>
+
+</form>
+{% endblock %}
