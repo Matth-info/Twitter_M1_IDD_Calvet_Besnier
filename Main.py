@@ -2,8 +2,9 @@ from sqlite3 import Connection as SQLite3Connection
 from datetime import datetime
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+import hashlib 
 
 # app
 app = Flask(__name__)
@@ -44,7 +45,7 @@ class Tweet(db.Model):
 @app.route("/")
 def home():
     
-    return render_template("Bleatter.html", utc_dt="hello i'm a variable")
+    return render_template("Bleatter.html", var_mes ="Hi, Buddy Let's bleat together")
 
 @app.route("/user", methods=["POST"]) # create user 
 def create_user():
@@ -54,7 +55,7 @@ def create_user():
     new_user = User(username = data["username"],
                     email = data["email"],
                     location = data["location"],
-                    pwd = data["password"]
+                    pwd = hash_password(data["password"])
                     )
     # add the user to the database
     db.session.add(new_user)
@@ -65,27 +66,47 @@ def create_user():
     return jsonify({"message":"User created"}),200
 
 
-@app.route("/register",methods=["POST","GET"])
-def register():
+def hash_password(pwd):
+    h = hashlib.sha256(str(pwd).encode('utf-8')) #we use sha256 hashfunction to hash the password
+    return int(h.hexdigest(), base=16)
+               
+@app.route("/signup",methods=["POST","GET"])
+def signup():
     # request.form is a kind of dictionnary
-    if request.method == "POST":
-        information = request.form # get the form
-        print("New user register")
-        print(information["username"]) #what the new user fill in username field
-        print(information["email"])
-        print(information['location'])
-        return
+    if request.method == "GET" :
+        return render_template("signup.html")
     
-    return render_template("register.html")
+    else:
+        data = request.form # get the form
+        print(data)
+        email = data["email"]
+        username = data["username"]
+        location = data["location"]
+        pwd = data["password"]
+        user = User.query.filter_by(email=email).first
+        if user:
+            flash('Email address already exists')
+            return redirect(url_for("Main.signup"))
+        new_user = User(email = email, username=username, location = location, pwd = hash_password(pwd))
+
+        db.session.add(new_user) # add the user to the database
+        db.session.commit()
+        
+        return render_template("Bleatter.html")
+    
 
 @app.route("/users",methods=["GET"])
 def get_all_users():
-    pass
-  
+    users = User.query.all()
+    return jsonify([user.serialize() for user in users]), 200
+
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")
 
 if __name__ == "__main__":
+    db.create_all()
     app.env = "development"
     app.run(host="localhost", port="5000")
