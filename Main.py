@@ -8,6 +8,7 @@ import hashlib
 
 # app
 app = Flask(__name__)
+app.secret_key = "012345"
 
 # database storing all the created tables
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///bleatter_database.db"
@@ -98,14 +99,14 @@ def signup():
         user = User.query.filter_by(email=email).first()
         if user:
             flash('Email address already exists')
-            return redirect(url_for("Main.signup"))
+            return redirect(url_for("signup"))
         else:
             new_user = User(email=email, username=username,
                             location=location, pwd=hash_password(pwd))
             db.session.add(new_user)
             db.session.commit()
             flash("Record was successfully added")
-            return render_template("Bleatter.html")  # put signin
+            return render_template("Bleatter.html"), 200  # put signin
 
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
@@ -141,7 +142,7 @@ def about():
 
 
 if __name__ == "__main__":
-    app.secret_key = "012345"
+   
     with app.app_context():
         db.create_all()
     app.env = "development"
