@@ -33,10 +33,10 @@ class User(db.Model):
     email = db.Column(db.String(64))
     pwd = db.Column(db.String(64))
     location = db.Column(db.String(64))
-    
+
     def serialize(self):
         return { "id" : self.id, "name" : self.username , "email" : self.email,"location" : self.location, "password ": self.pwd}
-    
+
 
 
 class Tweet(db.Model):
