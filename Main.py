@@ -107,6 +107,27 @@ def signup():
             flash("Record was successfully added")
             return render_template("Bleatter.html")  # put signin
 
+@app.route("/signin", methods=["GET", "POST"])
+def signin():
+
+    if request.method == "GET":
+        return render_template("signin.html")
+
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+
+    user = User.query.filter_by(email=email).first()
+    if user:
+        if hash_password(password) == user.pwd:
+            return render_template("Bleatter.html")
+        else:
+            flash("Wrong password")
+            return render_template("signin.html")
+    else:
+        flash("User don't exist")
+        return render_template("signin.html")
+
 
 @app.route("/users", methods=["GET"])
 def get_all_users():
@@ -125,4 +146,3 @@ if __name__ == "__main__":
         db.create_all()
     app.env = "development"
     app.run(host="localhost", port="5000")
-    print("TESTSETEST")
