@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %} {% endblock %} - FlaskApp</title>
+    <title>{% block title %} Bleatter {% endblock %} </title>
     <style>
         nav a {
             color: #009CFA;
@@ -12,14 +12,15 @@
         }
     </style>
 </head>
+
 <body>
     <nav>
         <a href="/">Bleatter</a>
         <a href="/about">About</a>
     </nav>
-    <hr>
     <div class="content">
-        {% block content %} {% endblock %}
+        {% block content %} 
+        {% endblock %}
     </div>
 </body>
 </html>
