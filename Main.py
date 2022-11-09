@@ -1,5 +1,4 @@
 from sqlite3 import Connection as SQLite3Connection
-from datetime import datetime
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from flask import Flask, request, jsonify, render_template, flash, redirect, url_for
@@ -108,20 +107,20 @@ def signup():
         pwd_c = request.form ["password_c"]
 
         if (pwd != pwd_c):
-            flash("Passwords are different")
+            flash("Passwords are different","error")
             return redirect(url_for("signup"))
 
         user = User.query.filter_by(email=email).first()
         if user:
-            flash('Email address already exists')
+            flash('Email address already exists',"error")
             return redirect(url_for("signup"))
         else:
             new_user = User(email=email, username=username,
                             location=location, pwd=hash_password(pwd))
             db.session.add(new_user)
             db.session.commit()
-            flash("Record was successfully added")
-            return render_template("Bleatter.html"), 200  # put signin
+            flash("Record was successfully added","info")
+            return render_template("signin.html"), 200  # put signin
 
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
@@ -129,7 +128,7 @@ def signin():
     if request.method == "GET":
         return render_template("signin.html")
 
-    if request.method == "POST":
+    else:
         email = request.form["email"]
         password = request.form["password"] #Recuperation du form
 
