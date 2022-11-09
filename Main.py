@@ -48,8 +48,10 @@ class Tweet(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     like = db.Column(db.Integer)
     retweet = db.Column(db.Integer)
-    reply = db.Column(db.Integer)  # Pour l'instant c'est juste un compteur
-    # On en fera une liste de reponse
+    reply = db.Column(db.Integer)  # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
+
+    def serialize(self):
+        return {"title": self.title, "content": self.content}
 
 
 @app.route("/")
@@ -72,6 +74,19 @@ def create_user():
     # database.
     return jsonify({"message": "User created"}), 200
 
+@app.route("/bleat", methods=["POST"])
+def create_bleat():
+    data = request.get_json()
+    new_bleat = Tweet(title = data["title"],
+                    content = data["content"],
+                    author_id = data["author_id"],
+                    like = data["like"],
+                    retweet = data["retweet"],
+                    reply = data["reply"]
+                    )
+    db.session.add(new_bleat)
+    db.session.commit()
+    return jsonify({"message": "Bleat created"}), 200
 
 def hash_password(pwd):
     # we use sha256 hashfunction to hash the password
@@ -116,11 +131,11 @@ def signin():
 
     if request.method == "POST":
         email = request.form["email"]
-        password = request.form["password"]
+        password = request.form["password"] #Recuperation du form
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first() #Check if user exist
     if user:
-        if hash_password(password) == user.pwd:
+        if hash_password(password) == user.pwd: #If yes check if this is the right password
             return render_template("Bleatter.html")
         else:
             flash("Wrong password")
@@ -140,9 +155,18 @@ def get_all_users():
 def about():
     return render_template("about.html")
 
+@app.route("/home_page", methods=["GET"])
+def home_user():
+    if request.method == "GET":
+        tweets = Tweet.query.all()
+        l = []
+        for t in tweets:
+            l.append(t.title +": "+ t.content)
+        return render_template("home_page.html", len = len(l), tweets=l)
+
 
 if __name__ == "__main__":
-   
+
     with app.app_context():
         db.create_all()
     app.env = "development"
