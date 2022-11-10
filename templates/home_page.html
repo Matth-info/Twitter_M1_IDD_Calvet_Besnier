@@ -1,17 +1,24 @@
 {% extends 'base.html' %}
 
 {% block title %}<title>Welcome back Bleattos</title>{% endblock %}
-    
+  
 {% block main %} 
-<h1>See your Feed below</h1>
 
-    <ol>
+    <div class="sidenav">
+        <a href="http://facebook.com">Profil</a>
+        <a href="http://twitter.com">Write a bleat</a>
+    </div>
+
+    <div class="sidenav_right">
+        
+    </div>
+
+    <div class="main">
+        <h1>See your Feed below</h1>
+
         {%for i in range(0, len)%}
-          
-            <li>{{bleats[i]}}</li>
+            <p>{{bleats[i]}}</p>
         {%endfor%}
-          
-    </ol>
-
+    </div>
 
 {% endblock %}
