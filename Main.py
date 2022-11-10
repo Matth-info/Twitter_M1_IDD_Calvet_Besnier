@@ -36,7 +36,8 @@ class User(db.Model):
 
     def serialize(self):
         return { "id" : self.id, "name" : self.username , "email" : self.email,"location" : self.location, "password ": self.pwd}
-
+    def __repr__(self):
+        return  '<Id %r>' %self.id +  '<Name %r>' % self.username + '<email %r>' % self.email + '<location %r>' % self.location
 
 
 class Tweet(db.Model):
@@ -98,7 +99,6 @@ def signup():
     # request.form is a kind of dictionnary
     if request.method == "GET":
         return render_template("signup.html")
-
     else:
         email = request.form ["email"]
         username = request.form ["username"]
@@ -107,12 +107,12 @@ def signup():
         pwd_c = request.form ["password_c"]
 
         if (pwd != pwd_c):
-            flash("Passwords are different","error")
+            flash("Passwords are different","info")
             return redirect(url_for("signup"))
 
         user = User.query.filter_by(email=email).first()
         if user:
-            flash('Email address already exists',"error")
+            flash('Email address already exists',"info")
             return redirect(url_for("signup"))
         else:
             new_user = User(email=email, username=username,
