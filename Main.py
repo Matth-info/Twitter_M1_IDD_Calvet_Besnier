@@ -186,11 +186,11 @@ def about():
 @app.route("/home_page", methods=["GET"])
 def home_user():
     if request.method == "GET":
-        tweets = Tweet.query.all()
+        bleats = Bleat.query.all()
         l = []
-        for t in tweets:
-            l.append(t.title +": "+ t.content)
-        return render_template("home_page.html", len = len(l), tweets=l)
+        for t in bleats:
+            l.append(t.title +": "+ t.content + " posté le "+ t.date[0:10] + " à " + t.date[11:19])
+        return render_template("home_page.html", len = len(l), bleats=l)
 
 
 if __name__ == "__main__":
