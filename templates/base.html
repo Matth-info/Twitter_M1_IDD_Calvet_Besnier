@@ -14,6 +14,12 @@
         <img src="https://cdn.dribbble.com/users/95644/screenshots/8157525/goat_4x.png" width="70" height="70">
         </a>
         <a style="float:left; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;"> BLEATTER </a> 
+        {% if session['current_user'] %}
+            <a href="/logout" style="float:right; line-height:70px; margin-right:20px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;">Log out</a>
+        {% else %}
+            <a href="/signin" style="float:right; line-height:70px; margin-right:10px; color:rgb(255, 255, 255);font-family: Arial; font-size: 20px;">Sign in</a>
+            <a href="/signup" style="float:right; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;">Sign up</a>
+        {% endif %}
         <a href="/about" style="float:right; line-height:70px; margin-right:20px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;">About us</a>
     </div>
     {% block main %} 
