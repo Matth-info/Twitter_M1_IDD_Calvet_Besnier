@@ -1,10 +1,12 @@
+import hashlib
 from sqlite3 import Connection as SQLite3Connection
+
+from flask import (Flask, flash, jsonify, redirect, render_template, request,
+                   url_for)
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-from flask import Flask, request, jsonify, render_template, flash, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-import hashlib
-
+import datetime
 # app
 app = Flask(__name__)
 app.secret_key = "012345"
@@ -40,8 +42,8 @@ class User(db.Model):
         return  '<Id %r>' %self.id +  '<Name %r>' % self.username + '<email %r>' % self.email + '<location %r>' % self.location
 
 
-class Tweet(db.Model):
-    __tablename__ = "Tweet"
+class Bleat(db.Model):
+    __tablename__ = "Bleat"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
     content = db.Column(db.String(256))
@@ -49,6 +51,7 @@ class Tweet(db.Model):
     like = db.Column(db.Integer)
     retweet = db.Column(db.Integer)
     reply = db.Column(db.Integer)  # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
+    date = db.Column(db.String(256))
 
     def serialize(self):
         return {"title": self.title, "content": self.content}
@@ -77,13 +80,15 @@ def create_user():
 @app.route("/bleat", methods=["POST"])
 def create_bleat():
     data = request.get_json()
-    new_bleat = Tweet(title = data["title"],
+    new_bleat = Bleat(title = data["title"],
                     content = data["content"],
                     author_id = data["author_id"],
                     like = data["like"],
                     retweet = data["retweet"],
-                    reply = data["reply"]
+                    reply = data["reply"],
+                    date = datetime.datetime.now()
                     )
+
     db.session.add(new_bleat)
     db.session.commit()
     return jsonify({"message": "Bleat created"}), 200
@@ -144,6 +149,29 @@ def signin():
         return render_template("signin.html")
 
 
+@app.route("/post_a_bleat", methods=["GET","POST"])
+def post_a_bleat():
+    if request.method == "GET":
+        return render_template("post_a_bleat.html")
+    else:
+        id_user = request.form["id"]
+        title = request.form["title"]
+        content = request.form["content"]
+
+        user = User.query.filter_by(id=id_user).first() # get the user associated to the id
+        if not user:
+            flash("User with " + id_user + " does not exist")
+            return render_template("post_a_bleat.html")
+        else:
+            new_bleat = Bleat(title = title, content = content, author_id = int(id_user)
+            ,like=0,retweet=0,reply=0, date = datetime.datetime.now())
+
+            db.session.add(new_bleat)
+            db.session.commit()
+            flash("Message was successfully added","info")
+            return redirect(url_for("home"))
+
+
 @app.route("/users", methods=["GET"])
 def get_all_users():
     users = User.query.all()
@@ -153,6 +181,7 @@ def get_all_users():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
 
 @app.route("/home_page", methods=["GET"])
 def home_user():
