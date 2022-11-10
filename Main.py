@@ -182,7 +182,7 @@ def signin():
             flash("Wrong password")
             return render_template("signin.html")
     else:
-        flash("User don't exist")
+        flash("User does not exist")
         return render_template("signin.html")
 
 @app.route("/logout")
