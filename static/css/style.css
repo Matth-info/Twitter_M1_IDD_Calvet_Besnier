@@ -33,12 +33,4 @@ input[type=text]{
 }
 
 
-button[type=submit] {
-    background-color: rgb(225, 140, 13);
-    border: none;
-    color: white;
-    padding: 16px 32px;
-    text-decoration: none;
-    margin: 4px 2px;
-    cursor: pointer;
-}
+
