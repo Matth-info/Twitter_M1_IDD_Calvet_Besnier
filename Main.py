@@ -185,6 +185,10 @@ def signin():
         flash("User don't exist")
         return render_template("signin.html")
 
+@app.route("/logout")
+def logout():
+    session.pop("current_user",None)
+    return redirect(url_for("home"))
 
 @app.route("/post_a_bleat", methods=["GET","POST"])
 def post_a_bleat():
