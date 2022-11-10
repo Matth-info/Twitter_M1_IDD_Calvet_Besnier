@@ -9,9 +9,9 @@
 
 
 <body style="margin: 0px">
-    <div style=" background-color: rgb(102, 45, 4);margin: 0px; height: 70px; ">
+    <div style=" background-color: rgb(251, 143, 0);margin: 0px; height: 70px; ">
         <a href = "/">
-        <img src="https://cdn.dribbble.com/users/95644/screenshots/8157525/goat_4x.png" width="70" height="70">
+        <img src="{{url_for('static', filename='logo.png')}}" width="80" height="80">
         </a>
         <a style="float:left; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;"> BLEATTER </a> 
         {% if session['current_user'] %}
