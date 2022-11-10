@@ -195,26 +195,29 @@ def post_a_bleat():
     if request.method == "GET":
         return render_template("post_a_bleat.html")
     else:
-        id_user = session.get('current_user',None)
-        if id_user is None:
-            render_template("signin.html")
-        else:
-            #id_user = request.form["id"]
-            title = request.form["title"]
-            content = request.form["content"]
-
-            user = User.query.filter_by(id=id_user).first() # get the user associated to the id
-            if not user:
-                flash("User with " + id_user + " does not exist")
-                return render_template("post_a_bleat.html")
+        if session.get('current_user') is None:
+            return render_template("signin.html")
+        else :
+            id_user = session.get('current_user',None)
+            if id_user is None:
+                flash("Feature not available without connection","info")
+                return redirect(url_for("signin"))
             else:
-                new_bleat = Bleat(title = title, content = content, author_id = int(id_user)
-                ,like=0,retweet=0,reply=0, date = datetime.datetime.now())
+                title = request.form["title"]
+                content = request.form["content"]
 
-                db.session.add(new_bleat)
-                db.session.commit()
-                flash("Message was successfully added","info")
-                return redirect(url_for("home"))
+                user = User.query.filter_by(id=id_user).first() # get the user associated to the id
+                if not user:
+                    flash("User with " + id_user + " does not exist")
+                    return render_template("post_a_bleat.html")
+                else:
+                    new_bleat = Bleat(title = title, content = content, author_id = int(id_user)
+                    ,like=0,retweet=0,reply=0, date = datetime.datetime.now())
+
+                    db.session.add(new_bleat)
+                    db.session.commit()
+                    flash("Message was successfully added","info")
+                    return redirect(url_for("home"))
 
 
 @app.route("/users", methods=["GET"])
