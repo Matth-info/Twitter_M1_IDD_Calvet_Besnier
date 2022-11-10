@@ -1,37 +1,58 @@
-<!DOCTYPE html>
-<html>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-<body>
-    <h1>
-        <b>Sign Up Now</b>
-    </h1>
-    <form action="http://localhost:5000/signup" , method="post">
-        <div>
-            <label for="name"> Name : </label>
-            <input name="username" type="text" id="name" required>
-        </div>
-        <div>
-            <label for="email"> Email : </label>
-            <input name="email" type="email" id="email" required>
-        </div>
-        <div>
-            <label for="Location">Location : </label>
-            <input name="location" type="text" id="Location">
-        </div>
-        <div>
-            <label for="password"> Password : </label>
-            <input name="password" type="password" id="password" required>
-        </div>
-        <div>
-            <label for="password_c"> Confirm your password : </label>
-            <input name="password_c" type="password" id="password_c" required>
-        </div>
+{% extends 'base.html' %}
 
 
-        <button type="Sign up">Create an account</button>
-    </form>
+{% block title %}<title>Sign in</title>{% endblock %}
+{% block style %}<style>
+    input[type=text],[type=email],[type=password] {
+        width: 50%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 2px solid rgb(225, 140, 13);
+        border-radius: 4px;
+        background-color: rgb(255, 255, 255);
+        color: white;
+    }
+    button[type=submit] {
+    background-color: rgb(225, 140, 13);
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    text-decoration: none;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+</style>
+{% endblock %}
+{% block main %}
+<h1 style="text-align:center;">
+    <b>Sign Up Now</b>
+</h1>
 
-</body>
+{%include 'flash.html' %}
 
-</html>
+<form action="http://localhost:5000/signup" method="post" style="text-align:center;">
+    <div>
+        <label style="font-family: Arial, Helvetica, sans-serif;" for="name"> Name : </label>
+        <input name="username" type="text" id="name" required>
+    </div>
+    <div>
+        <label style="font-family: Arial, Helvetica, sans-serif;" for="email"> Email : </label>
+        <input name="email" type="email" id="email" required>
+    </div>
+    <div>
+        <label style="font-family: Arial, Helvetica, sans-serif;" for="Location">Location : </label>
+        <input name="location" type="text" id="Location">
+    </div>
+    <div>
+        <label style="font-family: Arial, Helvetica, sans-serif;" for="password"> Password : </label>
+        <input name="password" type="password" id="password" required>
+    </div>
+    <div>
+        <label style="font-family: Arial, Helvetica, sans-serif;" for="password_c"> Confirm your password : </label>
+        <input name="password_c" type="password" id="password_c" required>
+    </div>
+    <button type="submit">Create an account</button>
+</form>
+
+{% endblock %}
