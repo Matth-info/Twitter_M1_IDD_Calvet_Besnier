@@ -1,20 +1,8 @@
-<!DOCTYPE html>
-<html>
-   <head>
-      <meta charset="UTF-8">
-      <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-      <title> Bleatter</title>
-   </head>
-   <body style="margin: 0px">
-      <div style=" background-color: #582900;margin: 0px; height: 70px; ">
-         <img src="https://cdn.dribbble.com/users/95644/screenshots/8157525/goat_4x.png" width="70" height="70">
-         <a style="float:left; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;"> BLEATTER </a> 
-      
-         <a href="/about" style="float:right; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;">About us</a>
-         <a href="/signin" style="float:right; line-height:70px; margin-right:10px; color:rgb(255, 255, 255);font-family: Arial; font-size: 20px;">Sign in</a>
-         <a href="/signup" style="float:right; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;">Sign up</a>
-      </div>
-      <h2>Welcome to Bleatter, where a Tweet is just a Bleat</h2>
-      
-   </body>
-</html>
+{% extends 'base.html' %}
+   
+   {% block title %}<title> Bleatter</title>{% endblock %}
+   {% block style %}{% endblock %}
+
+   {% block main %} 
+   <h2>Welcome to Bleatter, where a Tweet is just a Bleat</h2>
+   {% endblock %}
