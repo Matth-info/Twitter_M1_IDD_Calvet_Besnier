@@ -1,6 +1,44 @@
 h1 {
+    font-family: Arial, Helvetica, sans-serif;
     border: 2px #eee solid;
     color: rgb(225, 140, 13);
     text-align: left;
     padding: 10px;
+}
+nav a {
+    color: #009CFA;
+    font-size: 3em;
+    margin-left: 50px;
+    text-decoration: none;
+}
+
+h2{
+    font-family: Arial, Helvetica, sans-serif;
+}
+p{
+    font-family: Arial, Helvetica, sans-serif;
+    color: black;
+    margin-left: 50px;
+}
+
+input[type=text]{
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid rgb(225, 140, 13);
+    border-radius: 4px;
+    background-color: rgb(255, 255, 255);
+    color: white;
+}
+
+
+button[type=submit] {
+    background-color: rgb(225, 140, 13);
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    text-decoration: none;
+    margin: 4px 2px;
+    cursor: pointer;
 }
