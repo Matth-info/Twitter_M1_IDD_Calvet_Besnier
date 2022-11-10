@@ -232,10 +232,14 @@ def about():
 def home_user():
     if request.method == "GET":
         bleats = Bleat.query.all()
-        l = []
+        message = []
+        name = []
+        date = []
         for t in bleats:
-            l.append(t.title +": "+ t.content + " posté le "+ t.date[0:10] + " à " + t.date[11:19])
-        return render_template("home_page.html", len = len(l), bleats=l)
+            name.append(User.query.filter_by(id = t.author_id).first().username)
+            message.append(t.title +": " + t.content)
+            date.append("le " + t.date[0:10] + " à " + t.date[11:19])
+        return render_template("home_page.html", len = len(message), message=message, name=name, date=date)
 
 
 if __name__ == "__main__":
