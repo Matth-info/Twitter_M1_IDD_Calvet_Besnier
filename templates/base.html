@@ -2,26 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <title>{% block title %} Bleatter {% endblock %} </title>
-    <style>
-        nav a {
-            color: #009CFA;
-            font-size: 3em;
-            margin-left: 50px;
-            text-decoration: none;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    {% block title %}{% endblock %}
+    {% block style %}{% endblock %}
 </head>
 
-<body>
-    <nav>
-        <a href="/">Bleatter</a>
-        <a href="/about">About</a>
-    </nav>
-    <div class="content">
-        {% block content %} 
-        {% endblock %}
+
+<body style="margin: 0px">
+    <div style=" background-color: #582900;margin: 0px; height: 70px; ">
+        <a href = "/">
+        <img src="https://cdn.dribbble.com/users/95644/screenshots/8157525/goat_4x.png" width="70" height="70">
+        </a>
+        <a style="float:left; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;"> BLEATTER </a> 
+        <a href="/about" style="float:right; line-height:70px; margin-right:20px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;">About us</a>
     </div>
+    {% block main %} 
+    {% endblock %}
+
 </body>
 </html>
