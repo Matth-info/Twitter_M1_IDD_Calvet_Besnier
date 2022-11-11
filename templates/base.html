@@ -9,12 +9,13 @@
 
 
 <body style="margin: 0px">
-    <div style=" background-color: rgb(251, 143, 0);margin: 0px; height: 70px; ">
+    <div style="background-color: #FB8500 ;margin: 0px; height: 70px; ">
         <a href = "/">
         <img src="{{url_for('static', filename='logo.png')}}" width="80" height="80">
         </a>
         <a style="float:left; line-height:70px; margin-right:10px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;"> BLEATTER </a> 
         {% if session['current_user'] %}
+            <a style="float:right; line-height:70px; margin-right:20px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;"> Profile {{ session['current_user'] }}</a>
             <a href="/logout" style="float:right; line-height:70px; margin-right:20px; color:rgb(255, 255, 255); font-family: Arial; font-size: 20px;">Log out</a>
         {% else %}
             <a href="/signin" style="float:right; line-height:70px; margin-right:10px; color:rgb(255, 255, 255);font-family: Arial; font-size: 20px;">Sign in</a>
