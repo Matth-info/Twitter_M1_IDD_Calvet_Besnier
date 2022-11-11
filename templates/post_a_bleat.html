@@ -3,7 +3,7 @@
 {% block title %}<title>Post a bleat</title>{% endblock %}
 {% block style %}<style>
     input[type=text]{
-        width: 10%;
+        width: 30%;
         padding: 12px 20px;
         margin: 8px 0;
         box-sizing: border-box;
@@ -32,13 +32,13 @@ textarea{
 {% endblock %}
 {% block main %}
 <h1>Post a New Bleat</h1>
-<form action="http://localhost:5000/post_a_bleat" method="post" style="text-align:center;">
+<form action="http://localhost:5000/post_a_bleat" method="post" style="text-align:left;">
     <div>
-        <label style="font-family: Arial, Helvetica, sans-serif;" for="title"> Title </label>
-        <input name="title" type="text" id="title" required>
+        <label style="font-family: Arial, Helvetica, sans-serif; font-size: medium;" for="title"> Title </label>
+        <textarea name="title" type="text" id="title" required>
     </div>
     <div>
-        <label style="font-family: Arial, Helvetica, sans-serif;" for="content"> Message content</label>
+        <label style="font-family: Arial, Helvetica, sans-serif; font-size: medium;" for="content"> Message content</label>
         <textarea name="content" type="text" id="content" rows="15" cols="200">{{ request.form['content'] }}</textarea>
     </div>
    
