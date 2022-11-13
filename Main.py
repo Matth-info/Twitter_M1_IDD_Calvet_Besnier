@@ -161,7 +161,25 @@ def hash_password(pwd):
     h = hashlib.sha256(str(pwd).encode('utf-8'))
     return str(int(h.hexdigest(), base=16))
 
+@app.route("/bleat/<int:ID>",methods=["DELETE"])
+def delete_a_bleat(ID):
+    try :
+        data = Bleat.query.all()
+        T = data_struct.HashTable(len(data))    
+        for i in range(len(data)):
+            T.put(data[i].id,data[i])
+        
+        bleat_del = T.get(ID)
+        if bleat_del is None:
+            return jsonify({"message":"The Bleat with ID = " + str(ID) + " does not exist"}), 201
+        else :
+            db.session.delete(bleat_del)
+            db.session.commit()
+            return jsonify({"message":"The Bleat with ID = " + str(ID) + " as been successfully removed"}), 200
+    except Exception as e:
+        return jsonify({"error" : "Failed, caught exception " + str(e)}), 400
 
+        
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     # request.form is a kind of dictionnary
