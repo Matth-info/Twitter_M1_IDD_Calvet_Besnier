@@ -1,4 +1,3 @@
-
 from sqlite3 import Connection as SQLite3Connection
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
                    url_for, g, session)
@@ -38,6 +37,7 @@ class User(db.Model):
     email = db.Column(db.String(64))
     pwd = db.Column(db.String(64))
     location = db.Column(db.String(64))
+    bleats = db.relationship("Bleat",cascade="all, delete")
 
     def serialize(self):
         return { "id" : self.id, "name" : self.username , "email" : self.email,"location" : self.location, "password ": self.pwd}
@@ -59,6 +59,17 @@ class Bleat(db.Model):
     def serialize(self):
         return {"title": self.title, "content": self.content}
 
+from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
+
+class Relation(db.Model):
+    __tablename__ = "Relationship"
+    id = db.Column(db.Integer, primary_key=True)
+    userID1 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
+    userID2 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
+    CheckConstraint("userID1 != userID2", name="check1")
+    date = db.Column(db.String(256))
+    pending = db.Column(db.Boolean)
+   
 
 @app.route("/")
 def home():
@@ -82,7 +93,7 @@ def create_user():
 
 @app.route("/users/<int:ID>",methods=["GET","POST","DELETE"])
 def users(ID):
-    users = User.query.all()
+    #users = User.query.all()
     
     if (request.method == "GET"):
         user = User.query.filter_by(id = ID).first()
@@ -106,28 +117,44 @@ def users(ID):
         return jsonify({"message": "User created"}), 200
     else: 
         user_del = User.query.filter_by(id = ID).first()
-        if user_del:    
+        if user_del:
             db.session.delete(user_del)
             db.session.commit()
-            return jsonify({"message": "successfully deleted"}) , 200
+            return jsonify({"message": "User " + str(ID) + " and his associated bleats have been successfully deleted"}) , 200
         else:
             return jsonify({"message": "user not found"}), 201
 
 @app.route("/bleat", methods=["POST"])
 def create_bleat():
-    data = request.get_json()
-    new_bleat = Bleat(title = data["title"],
-                    content = data["content"],
-                    author_id = data["author_id"],
-                    like = data["like"],
-                    retweet = data["retweet"],
-                    reply = data["reply"],
-                    date = datetime.datetime.now()
-                    )
+    try :
+        data = request.get_json()
+        if data is None:
+            return jsonify({"error":"missing data, please enter it in the body"}),400
 
-    db.session.add(new_bleat)
-    db.session.commit()
-    return jsonify({"message": "Bleat created"}), 200
+        for field in ["title", "content", "author_id","like","retweet","reply"]:
+            if field not in data.keys():
+                return jsonify({"error": "no " + field + " in data" }), 400
+        
+        user = User.query.filter_by(id = data["author_id"]).first()
+        if user:
+            new_bleat = Bleat(title = data["title"],
+                            content = data["content"],
+                            author_id = data["author_id"],
+                            like = data["like"],
+                            retweet = data["retweet"],
+                            reply = data["reply"],
+                            date = datetime.datetime.now()
+                            )
+
+            db.session.add(new_bleat)
+            db.session.commit()
+            return jsonify({"message": "Bleat created"}), 200
+        else : 
+            return jsonify({"message" : "User does not exist"}), 201
+        
+    
+    except Exception as e:
+        return jsonify({"error" : "Failed, caught exception " + str(e)}), 400
 
 def hash_password(pwd):
     # we use sha256 hashfunction to hash the password
