@@ -61,7 +61,7 @@ class Bleat(db.Model):
 
 from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
 
-class Relation(db.Model):
+class Relationship(db.Model):
     __tablename__ = "Relationship"
     id = db.Column(db.Integer, primary_key=True)
     userID1 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
@@ -165,7 +165,7 @@ def hash_password(pwd):
 def delete_a_bleat(ID):
     try :
         data = Bleat.query.all()
-        T = data_struct.HashTable(len(data))    
+        T = HashTable(len(data))    
         for i in range(len(data)):
             T.put(data[i].id,data[i])
         
@@ -292,13 +292,14 @@ def home_user():
 
 from data_struct import LinkedList
 
-@app.route("user/<int:ID>/friends")
+"""function to get the friends of a given user"""
+@app.route("/user/<int:ID>/friends",methods=["GET"])
 def friends_of(ID):
     users = User.query.all() # load the users in the memory
     friends = Relationship.query.all() # load all the relationship data in the memory
     # implement a hash function with direct chaining to store the relation ship
     
-    U  = data_struct.HashTable(len(data))    
+    T  = HashTable(len(users))    
     for i in range(len(users)):
         T.put(users[i].id,users[i])
         
@@ -321,6 +322,48 @@ def friends_of(ID):
 
     return jsonify(r[ID].to_list()), 200
 
+@app.route("/bleats/<word>",methods=["GET"])
+def find_bleat_word(word):
+    # get the bleat
+    users = User.query.all()
+    d = dict()
+    for i in range(len(users)):
+        d[users[i].id] = users[i].username
+
+    bleats = Bleat.query.all()
+    bleat_ll = LinkedList()
+    for b in bleats:
+        bl = { "title": b.title,
+            "content" : b.content,
+            "author" : d[int(b.author_id)],
+            "like" :  b.like,
+            "retweet" : b.retweet,
+            "reply" : b.reply,
+            "date" : b.date
+         }
+        bleat_ll.insert_beginning(bl)
+    
+    temp = bleat_ll.head # start a the head of the linkedList
+    prev = None 
+
+    while (temp != None and temp.data["content"].find(word + " ") == -1):
+        head_ref = temp.next_node
+        temp = head_ref
+
+    while (temp != None): # programming a remove function under condition
+        while (temp != None and temp.data["content"].find(word + " ") != -1):
+            prev = temp
+            temp = temp.next_node
+
+        if (temp == None):
+            break
+
+        prev.next_node = temp.next_node
+        temp = prev.next_node
+
+    bleat_ll.head = head_ref # this the head of the linked list
+    b_list = bleat_ll.to_list()
+    return render_template("show_bleats.html", b_list = b_list)
 
 
     
