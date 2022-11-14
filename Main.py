@@ -290,6 +290,41 @@ def home_user():
         return render_template("home_page.html", len = len(message), message=message, name=name, date=date)
 
 
+from data_struct import LinkedList
+
+@app.route("user/<int:ID>/friends")
+def friends_of(ID):
+    users = User.query.all() # load the users in the memory
+    friends = Relationship.query.all() # load all the relationship data in the memory
+    # implement a hash function with direct chaining to store the relation ship
+    
+    U  = data_struct.HashTable(len(data))    
+    for i in range(len(users)):
+        T.put(users[i].id,users[i])
+        
+    r = dict() # r is a hashmap of linkedList
+    for ele in friends:
+        if ele.pending is True: # pending = True : relation / pending = 0 : not yet 
+            f = {
+                    "id" : T[ele.userID2].id,
+                    "username" : T[ele.userID2].username,
+                    "email" : T[ele.userID2].email,
+                    "location" : T[ele.userID2].location
+            }
+
+            if not(ele.userID1 in r.keys()):
+                r[ele.userID1] = LinkedList()
+                r[ele.userID1].insert_at_end(f)
+            else:
+                r[ele.userID1].insert_at_end(f)
+
+
+    return jsonify(r[ID].to_list()), 200
+
+
+
+    
+    
 if __name__ == "__main__":
 
     with app.app_context():
