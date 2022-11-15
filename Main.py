@@ -2,6 +2,7 @@ from sqlite3 import Connection as SQLite3Connection
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
                    url_for, g, session)
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 import datetime
@@ -27,7 +28,6 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
 
 
 db = SQLAlchemy(app)
-
 
 
 class User(db.Model):
@@ -58,8 +58,6 @@ class Bleat(db.Model):
 
     def serialize(self):
         return {"title": self.title, "content": self.content}
-
-from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
 
 class Relationship(db.Model):
     __tablename__ = "Relationship"
@@ -365,7 +363,26 @@ def find_bleat_word(word):
     b_list = bleat_ll.to_list()
     return render_template("show_bleats.html", b_list = b_list)
 
+@app.route("/profil", methods=["GET"])
+def profil():
+    if request.method == "GET":
+        cur_id = session.get("current_user")
+        users = User.query.all()
 
+        current_user = User.query.filter_by(id = cur_id).first()
+        username = current_user.username
+        location = current_user.location
+        bleats = current_user.bleats
+
+        message = []
+        date = []
+
+        for t in bleats:
+            message.append(t.title +" : " + t.content)
+            date.append(t.date[0:10] + " at  " + t.date[11:19])
+
+
+        return render_template("profil.html", len=len(message), username = username, location=location, message = message, date=date)
 
 
 if __name__ == "__main__":
