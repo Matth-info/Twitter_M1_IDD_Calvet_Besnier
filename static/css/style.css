@@ -36,24 +36,24 @@ input[type=text]{
     height: 100%;
     width: 160px;
     position: fixed;
-    z-index: 1;
-    top: 0; /* 70*/
+    z-index: 7;
+    top: 70;
     left: 0;
     background-color: #219EBC;
     overflow-x: hidden;
-    padding-top: 20px;
+    padding-top: 70px;
 }
 
 .sidenav_right {
     height: 100%;
     width: 300px;
-    position: static;
-    z-index: 1;
+    position: fixed;
+    z-index: 7;
     top: 70;
     right: 0;
-    background-color: #219EBC;
+    background-color: #514EAA;
     overflow-x: hidden;
-    padding-top: 20px;
+    padding-top: 70px;
 }
   
 .sidenav a {
