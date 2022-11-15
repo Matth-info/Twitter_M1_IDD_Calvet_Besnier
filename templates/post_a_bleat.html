@@ -1,48 +1,50 @@
 {% extends 'base.html' %}
 
 {% block title %}<title>Post a bleat</title>{% endblock %}
-{% block style %}<style>
-    input[type=text]{
-        width: 30%;
-        padding: 12px 20px;
-        margin: 8px 0;
+{% block style %}
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<style>
+    input[type=text] {
         box-sizing: border-box;
-        border: 2px solid  rgb(225, 140, 13);
-        border-radius: 4px;
+        border: 2px solid rgb(225, 140, 13);
+        border-radius: 5px;
         background-color: rgb(255, 246, 232);
         color: rgb(0, 0, 0);
     }
-    button[type=submit] {
-    background-color: rgb(225, 140, 13);
-    border: none;
-    border-radius: 4px;
-    color: white;
-    padding: 16px 32px;
-    text-decoration: none;
-    margin: 4px 2px;
-    cursor: pointer;
-}
 
-textarea{
-    background-color: rgb(255, 246, 232);
-    border-radius: 4px;
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+    button[type=submit] {
+        background-color: rgb(225, 140, 13);
+        border: none;
+        border-radius: 4px;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
 {% block main %}
 <h1>Post a New Bleat</h1>
-<form action="http://localhost:5000/post_a_bleat" method="post" style="text-align:left;">
-    <div>
-        <label style="font-family: Arial, Helvetica, sans-serif; font-size: medium;" for="title"> Title </label>
-        <textarea name="title" type="text" id="title" required>
-    </div>
-    <div>
-        <label style="font-family: Arial, Helvetica, sans-serif; font-size: medium;" for="content"> Message content</label>
-        <textarea name="content" type="text" id="content" rows="15" cols="200">{{ request.form['content'] }}</textarea>
-    </div>
-   
-    <button type="submit">Submit</button>
-</form>
+<div class="container">
+    <form action="http://localhost:5000/post_a_bleat" method="post" class='form-horizontal'>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="title"> Title </label>
+            <div class="col-sm-10">
+                <input class="form-control" name="title" type="text" id="title" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="content"> Message content </label>
+            <div class="col-sm-10">
+                <textarea class="form-control" name="content" type="text" id="content" rows="15"
+                    cols="200">{{ request.form['content'] }}</textarea>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
 
+    </form>
+</div>
 {% endblock %}
