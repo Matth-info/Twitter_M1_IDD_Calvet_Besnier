@@ -32,31 +32,33 @@ input[type=text]{
     color: white;
 }
 
-.sidenav {
+.sidenav_left {
     height: 100%;
     width: 160px;
     position: fixed;
-    z-index: 7;
     top: 70;
     left: 0;
-    background-color: #219EBC;
     overflow-x: hidden;
-    padding-top: 70px;
+    padding-top: 20px;
+    border-right: 2px solid rgb(241, 153, 0);
+    border-top: 2px solid rgb(241, 153, 0);
+    border-radius: 5px;
 }
 
 .sidenav_right {
     height: 100%;
-    width: 150px;
+    width: 200px;
     position: fixed;
-    z-index: 7;
     top: 70;
     right: 0;
-    background-color: #514EAA;
     overflow-x: hidden;
-    padding-top: 70px;
+    padding-top: 20px;
+    border-left: 2px solid rgb(241, 153, 0);
+    border-top: 2px solid rgb(241, 153, 0);
+    border-radius: 5px;
 }
   
-.sidenav a {
+.sidenav_left a {
     padding: 6px 8px 6px 16px;
     text-decoration: none;
     font-size: 25px;
@@ -64,12 +66,18 @@ input[type=text]{
     display: block;
 }
   
-.sidenav a:hover {
-    color: #f1f1f1;
+.sidenav_left a:hover {
+    color: #f454f1;
 }
 
 .main {
     margin-left: 160px; /* Same as the width of the sidebar */
-    margin-right: 300px; /*Same as the width of the right sizebar*/
+    margin-right: 200px; /*Same as the width of the right sizebar*/
     padding: 0px 10px;
   }
+
+.bleat {
+    border: 1px solid rgb(241, 153, 0);
+    border-radius: 5px;
+    margin-top: 3px;
+}
