@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 
 
-{% block title %}<title>Sign up</title>{% endblock %}
-{% block style %}<style>
+    {% block title %}<title>Sign up</title>{% endblock %}
+    {% block style %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
     input[type=text],[type=email],[type=password] {
-        width: 50%;
-        padding: 12px 20px;
-        margin: 8px 0;
         box-sizing: border-box;
         border: 2px solid rgb(225, 140, 13);
-        border-radius: 4px;
+        border-radius: 5px;
         background-color: rgb(255, 255, 255);
         color: rgb(0, 0, 0);
     }
@@ -17,42 +19,63 @@
     background-color: rgb(225, 140, 13);
     border: none;
     color: white;
-    padding: 16px 32px;
     text-decoration: none;
     margin: 4px 2px;
     cursor: pointer;
-}
-</style>
-{% endblock %}
-{% block main %}
-<h1 style="text-align:center;">
-    <b>Sign Up Now</b>
-</h1>
+    }
+    </style>
+    {% endblock %}
+    
 
-{%include 'flash.html' %}
 
-<form action="http://localhost:5000/signup" method="post" style="text-align:center;">
-    <div>
-        <label style="font-family: Arial, Helvetica, sans-serif;" for="name"> Name : </label>
-        <input name="username" type="text" id="name" required>
+{% block main %} 
+    <div class="container">
+        <h1>
+            <b>Sign Up Now</b>
+        </h1>
+        <form action="http://localhost:5000/signup" method="post" class='form-horizontal'>
+
+            <div class="form-group">
+                <label for="name" class='form-horizontal'> Name : </label>
+                <div class="col-sm-10">
+                    <input name="username" type="text" id="name" class="form-control" placeholder="Enter a name"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="control-label col-sm-2"> Email : </label>
+                <div class="col-sm-10">
+                    <input name="email" type="email" class="form-control" id="email" placeholder="Enter a email"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="Location" class="control-label col-sm-2"> Location : </label>
+                <div class="col-sm-10">
+                    <input name="location" type="text" class="form-control" id="Location" placeholder="share your location">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="control-label col-sm-2"> Password : </label>
+                <div class="col-sm-10">
+                    <input name="password" type="password" id="password" class="form-control"
+                        placeholder="Enter password" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password_c" class="control-label col-sm-2"> </label>
+                <div class="col-sm-10">
+                    <input name="password_c" type="password" id="password_c" class="form-control"
+                        placeholder="Confirm your password" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-default">Create an account</button>
+        </form>
     </div>
-    <div>
-        <label style="font-family: Arial, Helvetica, sans-serif;" for="email"> Email : </label>
-        <input name="email" type="email" id="email" required>
     </div>
-    <div>
-        <label style="font-family: Arial, Helvetica, sans-serif;" for="Location">Location : </label>
-        <input name="location" type="text" id="Location">
-    </div>
-    <div>
-        <label style="font-family: Arial, Helvetica, sans-serif;" for="password"> Password : </label>
-        <input name="password" type="password" id="password" required>
-    </div>
-    <div>
-        <label style="font-family: Arial, Helvetica, sans-serif;" for="password_c"> Confirm your password : </label>
-        <input name="password_c" type="password" id="password_c" required>
-    </div>
-    <button type="submit">Create an account</button>
-</form>
 
 {% endblock %}
