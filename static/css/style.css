@@ -46,7 +46,7 @@ input[type=text]{
 
 .sidenav_right {
     height: 100%;
-    width: 300px;
+    width: 150px;
     position: fixed;
     z-index: 7;
     top: 70;
