@@ -7,9 +7,9 @@ def nextprime(n):
         if(p%i==0):
             p=p+1
     else:
-        print(p,end=" ")
+        return p
 
-class HashTable:
+class HashTable(object):
 	def __init__(self, nb_element):
 		self.size = nextprime(math.floor(1.3 * nb_element))
 		self.slots = [None] * self.size
@@ -104,13 +104,13 @@ class BloomFilter(object):
         # return a probability of the key being in the bloom filter.
 
 
-class Node:
+class Node(object):
     def __init__(self, data=None, next_node=None):
         self.data = data
         self.next_node = next_node
 
 
-class LinkedList:
+class LinkedList(object):
     def __init__(self):
         self.head = None
         self.last_node = None
@@ -154,13 +154,5 @@ class LinkedList:
 
         self.last_node.next_node = Node(data, None)
         self.last_node = self.last_node.next_node
-
-    def get_user_by_id(self, user_id):
-        node = self.head
-        while node:
-            if node.data["id"] is int(user_id):
-                return node.data
-            node = node.next_node
-        return None
 
 

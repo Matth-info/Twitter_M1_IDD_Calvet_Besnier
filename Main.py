@@ -69,7 +69,7 @@ class Relationship(db.Model):
     CheckConstraint("userID1 != userID2", name="check1")
     date = db.Column(db.String(256))
     pending = db.Column(db.Boolean)
-   
+
 
 @app.route("/")
 def home():
@@ -94,14 +94,14 @@ def create_user():
 @app.route("/users/<int:ID>",methods=["GET","POST","DELETE"])
 def users(ID):
     #users = User.query.all()
-    
+
     if (request.method == "GET"):
         user = User.query.filter_by(id = ID).first()
-        if user:    
+        if user:
             return jsonify(user.serialize()), 200
         else:
             return jsonify({"message":" No student found"}), 201
-    
+
     elif (request.method == "POST"):
         data = request.get_json()
         new_user = User(username=data["username"],
@@ -115,7 +115,7 @@ def users(ID):
         db.session.commit()  # take the entire session and update the
         # database.
         return jsonify({"message": "User created"}), 200
-    else: 
+    else:
         user_del = User.query.filter_by(id = ID).first()
         if user_del:
             db.session.delete(user_del)
@@ -134,7 +134,7 @@ def create_bleat():
         for field in ["title", "content", "author_id","like","retweet","reply"]:
             if field not in data.keys():
                 return jsonify({"error": "no " + field + " in data" }), 400
-        
+
         user = User.query.filter_by(id = data["author_id"]).first()
         if user:
             new_bleat = Bleat(title = data["title"],
@@ -149,10 +149,10 @@ def create_bleat():
             db.session.add(new_bleat)
             db.session.commit()
             return jsonify({"message": "Bleat created"}), 200
-        else : 
+        else :
             return jsonify({"message" : "User does not exist"}), 201
-        
-    
+
+
     except Exception as e:
         return jsonify({"error" : "Failed, caught exception " + str(e)}), 400
 
@@ -165,10 +165,10 @@ def hash_password(pwd):
 def delete_a_bleat(ID):
     try :
         data = Bleat.query.all()
-        T = HashTable(len(data))    
+        T = HashTable(len(data))
         for i in range(len(data)):
             T.put(data[i].id,data[i])
-        
+
         bleat_del = T.get(ID)
         if bleat_del is None:
             return jsonify({"message":"The Bleat with ID = " + str(ID) + " does not exist"}), 201
@@ -179,7 +179,7 @@ def delete_a_bleat(ID):
     except Exception as e:
         return jsonify({"error" : "Failed, caught exception " + str(e)}), 400
 
-        
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     # request.form is a kind of dictionnary
@@ -221,8 +221,8 @@ def signin():
     user = User.query.filter_by(email=email).first() #Check if user exist
     if user:
         if hash_password(password) == user.pwd: #If yes check if this is the right password
-            session["current_user"] = user.id # the session.current_user keep the id user, it will be custom the user experience 
-            return render_template("post_a_bleat.html") 
+            session["current_user"] = user.id # the session.current_user keep the id user, it will be custom the user experience
+            return render_template("post_a_bleat.html")
         else:
             flash("Wrong password")
             return render_template("signin.html")
@@ -292,19 +292,20 @@ def home_user():
 
 from data_struct import LinkedList
 
-@app.route("/user/<int:ID>/friends")
+"""function to get the friends of a given user"""
+@app.route("/user/<int:ID>/friends",methods=["GET"])
 def friends_of(ID):
     users = User.query.all() # load the users in the memory
     friends = Relationship.query.all() # load all the relationship data in the memory
     # implement a hash function with direct chaining to store the relation ship
-    
+
     T  = HashTable(len(users))
     for i in range(len(users)):
         T.put(users[i].id,users[i])
-        
+
     r = dict() # r is a hashmap of linkedList
     for ele in friends:
-        if ele.pending is True: # pending = True : relation / pending = 0 : not yet 
+        if ele.pending is True: # pending = True : relation / pending = 0 : not yet
             f = {
                     "id" : T[ele.userID2].id,
                     "username" : T[ele.userID2].username,
@@ -321,10 +322,52 @@ def friends_of(ID):
 
     return jsonify(r[ID].to_list()), 200
 
+@app.route("/bleats/<word>",methods=["GET"])
+def find_bleat_word(word):
+    # get the bleat
+    users = User.query.all()
+    d = dict()
+    for i in range(len(users)):
+        d[users[i].id] = users[i].username
+
+    bleats = Bleat.query.all()
+    bleat_ll = LinkedList()
+    for b in bleats:
+        bl = { "title": b.title,
+            "content" : b.content,
+            "author" : d[int(b.author_id)],
+            "like" :  b.like,
+            "retweet" : b.retweet,
+            "reply" : b.reply,
+            "date" : b.date
+         }
+        bleat_ll.insert_beginning(bl)
+
+    temp = bleat_ll.head # start a the head of the linkedList
+    prev = None
+
+    while (temp != None and temp.data["content"].find(word + " ") == -1):
+        head_ref = temp.next_node
+        temp = head_ref
+
+    while (temp != None): # programming a remove function under condition
+        while (temp != None and temp.data["content"].find(word + " ") != -1):
+            prev = temp
+            temp = temp.next_node
+
+        if (temp == None):
+            break
+
+        prev.next_node = temp.next_node
+        temp = prev.next_node
+
+    bleat_ll.head = head_ref # this the head of the linked list
+    b_list = bleat_ll.to_list()
+    return render_template("show_bleats.html", b_list = b_list)
 
 
-    
-    
+
+
 if __name__ == "__main__":
 
     with app.app_context():

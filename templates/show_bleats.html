@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+   
+   {% block title %}<title> Bleats</title>{% endblock %}
+   {% block style %}{% endblock %}
+
+   {% block main %} 
+   {%for ele in b_list %}
+
+            <p><strong>{{ele["title"]}}</strong></p>
+            <p> {{ele["author"]}} </p>
+            <p> {{ele["date"]}} </p>
+            <p> {{ele["content"]}} </p>
+            
+            <hr>
+
+        {%endfor%}
+   {% endblock %}
