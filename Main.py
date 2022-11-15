@@ -71,7 +71,7 @@ class Relationship(db.Model):
     pending = db.Column(db.Boolean)
 
 
-@app.route("/")
+@app.route("/") # testing root 
 def home():
     return render_template("Bleatter.html")
 
@@ -285,8 +285,8 @@ def home_user():
         date = []
         for t in bleats:
             name.append(User.query.filter_by(id = t.author_id).first().username)
-            message.append(t.title +": " + t.content)
-            date.append("le " + t.date[0:10] + " à " + t.date[11:19])
+            message.append(t.title +" : " + t.content)
+            date.append(t.date[0:10] + " at  " + t.date[11:19])
         return render_template("home_page.html", len = len(message), message=message, name=name, date=date)
 
 
