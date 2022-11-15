@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+<head>
+    <meta charset="utf-8">
+    {% block style %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    {% endblock %}
+
+{% block title %}<title>Welcome back Bleattos</title>{% endblock %}
+  
+{% block main %}
+
+    {%for i in range(0, len)%}
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <img src="..." class="rounded mr-2" alt="...">
+          <strong class="mr-auto">{{name[i]}}</strong>
+          <small class="text-muted">{{date[i]}}</small>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+            <p>{{message[i]}}</p>
+        </div>
+    </div>
+    {%endfor%}
+
+
+{% endblock %}
