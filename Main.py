@@ -61,7 +61,7 @@ class Bleat(db.Model):
 
 from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
 
-class Relation(db.Model):
+class Relationship(db.Model):
     __tablename__ = "Relationship"
     id = db.Column(db.Integer, primary_key=True)
     userID1 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
@@ -165,7 +165,7 @@ def hash_password(pwd):
 def delete_a_bleat(ID):
     try :
         data = Bleat.query.all()
-        T = data_struct.HashTable(len(data))    
+        T = HashTable(len(data))    
         for i in range(len(data)):
             T.put(data[i].id,data[i])
         
@@ -292,13 +292,13 @@ def home_user():
 
 from data_struct import LinkedList
 
-@app.route("user/<int:ID>/friends")
+@app.route("/user/<int:ID>/friends")
 def friends_of(ID):
     users = User.query.all() # load the users in the memory
     friends = Relationship.query.all() # load all the relationship data in the memory
     # implement a hash function with direct chaining to store the relation ship
     
-    U  = data_struct.HashTable(len(data))    
+    T  = HashTable(len(users))
     for i in range(len(users)):
         T.put(users[i].id,users[i])
         
