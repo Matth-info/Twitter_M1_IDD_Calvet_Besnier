@@ -4,13 +4,18 @@
   
 {% block main %} 
 
-    <div class="sidenav">   
-        <a href="#" >Profil</a>
+    <div class="sidenav_left">   
+        <a href="/profil" >Profil</a>
         <a href="/post_a_bleat">Post a bleat</a>
     </div>
 
     <div class="sidenav_right">
-        <p> If we have time TT</p>
+
+        <form id="form"> 
+            <input type="text" placeholder="Search...">
+            <button>Search</button>
+        </form>
+
         <p> Insert maybe news</p>
         <p> Insert pub</p>
     </div>
@@ -19,11 +24,11 @@
         <h1>See your Feed below</h1>
 
         {%for i in range(0, len)%}
-
-            <p><strong>{{name[i]}}</strong></p>
-            <p>{{message[i]}}</p>
-            <p>{{date[i]}}</p>
-            <hr>
+            <div class="bleat">
+                <p><strong>{{name[i]}}</strong></p>
+                <p>{{message[i]}}</p>
+                <p>{{date[i]}}</p>
+            </div>   
 
         {%endfor%}
     </div>
