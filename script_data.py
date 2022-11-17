@@ -144,6 +144,7 @@ def generate_relationship(n=200):
     return "success"
 
 if __name__ == "__main__":
+    pass
     #print(generate_users())
     #print(generate_bleat())
     #print(generate_relationship())
