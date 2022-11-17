@@ -2,10 +2,6 @@
 
 {% block title %}<title>Sign in</title>{% endblock %}
 {% block style %}
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <style>
     input[type=text],
     [type=email],
@@ -27,31 +23,38 @@
     }
 </style>
 {% endblock %}
+
+
 {% block main %}
+<div class="container pt-5">
+    <h3 class="text-center">
+        Sign In Now
+    </h3>
+</div>
 
-<h1 style="text-align:center;">
-    Sign In Now
-</h1>
+<div class="container p-1">
+    {%include 'flash.html' %}
+</div>
 
-{%include 'flash.html' %}
-<div class="container">
-<form action="http://localhost:5000/signin" , method="post" style="text-align:center;">
-    <div class="form-group">
-        <label for="email" class="control-label col-sm-2"> Email : </label>
-        <div class="col-sm-10">
-            <input name="email" type="email" class="form-control" id="email" placeholder="Enter your email" required>
+<div class="container p-3 d-flex justify-content-center">
+    <form class="form-inline" action="http://localhost:5000/signin"  method="post">
+        <div class="form-group">
+            <label for="email" class="control-label col-sm-2">Email</label>
+            <div class="col-sm-10">
+                <input name="email" type="email" class="form-control" id="email" placeholder="Enter your email"
+                    required>
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label for="password" class="control-label col-sm-2"> Password : </label>
-        <div class="col-sm-10">
-            <input name="password" type="password" id="password" class="form-control" placeholder="Enter your password"
-                required>
+        <div class="form-group">
+            <label for="password" class="control-label col-sm-2">Password</label>
+            <div class="col-sm-10">
+                <input name="password" type="password" id="password" class="form-control"
+                    placeholder="Enter your password" required>
+            </div>
         </div>
-    </div>
 
-    <button class="btn btn-default" type="submit">Sign In</button>
-</form>
+        <button class="btn btn-default" type="submit">Sign In</button>
+    </form>
 </div>
 {% endblock %}
