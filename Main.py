@@ -363,8 +363,8 @@ def find_bleat_word(word):
     b_list = bleat_ll.to_list()
     return render_template("show_bleats.html", b_list = b_list)
 
-@app.route("/profil", methods=["GET"])
-def profil():
+@app.route("/profile", methods=["GET"])
+def profile():
     if request.method == "GET":
         cur_id = session.get("current_user")
         users = User.query.all()
@@ -382,12 +382,13 @@ def profil():
             date.append(t.date[0:10] + " at  " + t.date[11:19])
 
 
-        return render_template("profil.html", len=len(message), username = username, location=location, message = message, date=date)
+        return render_template("profile.html", len=len(message), username = username, location=location, message = message, date=date)
 
 
 if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
+    app.debug = True 
     app.env = "development"
     app.run(host="localhost", port="5000")
