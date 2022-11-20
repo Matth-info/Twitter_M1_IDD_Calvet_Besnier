@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}<title>Friends</title>{% endblock %}
+{% block style %}{% endblock %}
+
+{% block main %}
+<div class="container">
+    <h1> Friends of {{name}} </h1>
+
+    <ul>
+        <h3>Current list of friends on Bleatter</h3>
+        <span class="badge bg-primary rounded-pill"> {{F|length}}</span>
+        {% for ele in F %}
+        <li class="list-group-item" aria-current="true">
+            {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}</li>
+        {%endfor%}
+    </ul>
+    <ul>
+        <h3>Don't lose hope, they will accept you very soon !</h3>
+        <span class="badge bg-primary rounded-pill"> {{I|length}}</span>
+        {% for ele in I %}
+        <li class="list-group-item " aria-current="true">
+            {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}</li>
+
+        {%endfor%}
+    </ul>
+    <ul>
+        <h3>Some users want to be your friends</h3>
+        <span class="badge bg-primary rounded-pill"> {{W|length}}</span>
+        {% for ele in W %}
+        <li class="list-group-item" aria-current="true">
+            {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}</li>
+        {%endfor%}
+    </ul>
+</div>
+
+
+{% endblock %}
