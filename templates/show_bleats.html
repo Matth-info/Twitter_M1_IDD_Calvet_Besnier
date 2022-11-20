@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
-   
-   {% block title %}<title> Bleats</title>{% endblock %}
-   {% block style %}{% endblock %}
 
-   {% block main %} 
-   {%for ele in b_list %}
+{% block title %}<title> Bleats</title>{% endblock %}
+{% block style %}{% endblock %}
 
-            <p><strong>{{ele["title"]}}</strong></p>
-            <p> {{ele["author"]}} </p>
-            <p> {{ele["date"]}} </p>
-            <p> {{ele["content"]}} </p>
-            
-            <hr>
+{% block main %}
+{%for ele in b_list %}
 
-        {%endfor%}
-   {% endblock %}
+<p><strong>{{ele["title"]}}</strong></p>
+<p> {{ele["author"]}} </p>
+<p> {{ele["date"]}} </p>
+<p> {{ele["content"]}} </p>
+
+<hr>
+
+{%endfor%}
+{% endblock %}
