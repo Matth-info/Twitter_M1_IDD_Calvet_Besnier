@@ -1,3 +1,7 @@
+import numpy as np
+from scipy.sparse import csr_matrix
+import scipy as sp
+from data_struct import LinkedList
 from sqlite3 import Connection as SQLite3Connection
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
                    url_for, g, session)
@@ -37,12 +41,13 @@ class User(db.Model):
     email = db.Column(db.String(64))
     pwd = db.Column(db.String(64))
     location = db.Column(db.String(64))
-    bleats = db.relationship("Bleat",cascade="all, delete")
+    bleats = db.relationship("Bleat", cascade="all, delete")
 
     def serialize(self):
-        return { "id" : self.id, "name" : self.username , "email" : self.email,"location" : self.location, "password ": self.pwd}
+        return {"id": self.id, "name": self.username, "email": self.email, "location": self.location, "password ": self.pwd}
+
     def __repr__(self):
-        return  '<Id %r>' %self.id +  '<Name %r>' % self.username + '<email %r>' % self.email + '<location %r>' % self.location
+        return '<Id %r>' % self.id + '<Name %r>' % self.username + '<email %r>' % self.email + '<location %r>' % self.location
 
 
 class Bleat(db.Model):
@@ -53,11 +58,13 @@ class Bleat(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     like = db.Column(db.Integer)
     retweet = db.Column(db.Integer)
-    reply = db.Column(db.Integer)  # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
+    # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
+    reply = db.Column(db.Integer)
     date = db.Column(db.String(256))
 
     def serialize(self):
         return {"title": self.title, "content": self.content}
+
 
 class Relationship(db.Model):
     __tablename__ = "Relationship"
@@ -69,7 +76,7 @@ class Relationship(db.Model):
     pending = db.Column(db.Boolean)
 
 
-@app.route("/") # testing root 
+@app.route("/")  # testing root
 def home():
     return render_template("Bleatter.html")
 
@@ -80,7 +87,7 @@ def create_user():
     new_user = User(username=data["username"],
                     email=data["email"],
                     location=data["location"],
-                    pwd= hash_password(data["password"])
+                    pwd=hash_password(data["password"])
                     )
     # add the user to the database
     db.session.add(new_user)
@@ -89,24 +96,25 @@ def create_user():
     # database.
     return jsonify({"message": "User created"}), 200
 
-@app.route("/users/<int:ID>",methods=["GET","POST","DELETE"])
+
+@app.route("/users/<int:ID>", methods=["GET", "POST", "DELETE"])
 def users(ID):
     #users = User.query.all()
 
     if (request.method == "GET"):
-        user = User.query.filter_by(id = ID).first()
+        user = User.query.filter_by(id=ID).first()
         if user:
             return jsonify(user.serialize()), 200
         else:
-            return jsonify({"message":" No student found"}), 201
+            return jsonify({"message": " No student found"}), 201
 
     elif (request.method == "POST"):
         data = request.get_json()
         new_user = User(username=data["username"],
-                    email=data["email"],
-                    location=data["location"],
-                    pwd= hash_password(data["password"])
-                    )
+                        email=data["email"],
+                        location=data["location"],
+                        pwd=hash_password(data["password"])
+                        )
         # add the user to the database
         db.session.add(new_user)
         # commit to the database
@@ -114,68 +122,70 @@ def users(ID):
         # database.
         return jsonify({"message": "User created"}), 200
     else:
-        user_del = User.query.filter_by(id = ID).first()
+        user_del = User.query.filter_by(id=ID).first()
         if user_del:
             db.session.delete(user_del)
             db.session.commit()
-            return jsonify({"message": "User " + str(ID) + " and his associated bleats have been successfully deleted"}) , 200
+            return jsonify({"message": "User " + str(ID) + " and his associated bleats have been successfully deleted"}), 200
         else:
             return jsonify({"message": "user not found"}), 201
 
+
 @app.route("/bleat", methods=["POST"])
 def create_bleat():
-    try :
+    try:
         data = request.get_json()
         if data is None:
-            return jsonify({"error":"missing data, please enter it in the body"}),400
+            return jsonify({"error": "missing data, please enter it in the body"}), 400
 
-        for field in ["title", "content", "author_id","like","retweet","reply"]:
+        for field in ["title", "content", "author_id", "like", "retweet", "reply"]:
             if field not in data.keys():
-                return jsonify({"error": "no " + field + " in data" }), 400
+                return jsonify({"error": "no " + field + " in data"}), 400
 
-        user = User.query.filter_by(id = data["author_id"]).first()
+        user = User.query.filter_by(id=data["author_id"]).first()
         if user:
-            new_bleat = Bleat(title = data["title"],
-                            content = data["content"],
-                            author_id = data["author_id"],
-                            like = data["like"],
-                            retweet = data["retweet"],
-                            reply = data["reply"],
-                            date = datetime.datetime.now()
-                            )
+            new_bleat = Bleat(title=data["title"],
+                              content=data["content"],
+                              author_id=data["author_id"],
+                              like=data["like"],
+                              retweet=data["retweet"],
+                              reply=data["reply"],
+                              date=datetime.datetime.now()
+                              )
 
             db.session.add(new_bleat)
             db.session.commit()
             return jsonify({"message": "Bleat created"}), 200
-        else :
-            return jsonify({"message" : "User does not exist"}), 201
-
+        else:
+            return jsonify({"message": "User does not exist"}), 201
 
     except Exception as e:
-        return jsonify({"error" : "Failed, caught exception " + str(e)}), 400
+        return jsonify({"error": "Failed, caught exception " + str(e)}), 400
+
 
 def hash_password(pwd):
     # we use sha256 hashfunction to hash the password
     h = hashlib.sha256(str(pwd).encode('utf-8'))
     return str(int(h.hexdigest(), base=16))
 
-@app.route("/bleat/<int:ID>",methods=["DELETE"])
+
+@app.route("/bleat/<int:ID>", methods=["DELETE"])
 def delete_a_bleat(ID):
-    try :
+    try:
         data = Bleat.query.all()
         T = HashTable(len(data))
         for i in range(len(data)):
-            T.put(data[i].id,data[i])
+            T.put(data[i].id, data[i])
 
         bleat_del = T.get(ID)
         if bleat_del is None:
-            return jsonify({"message":"The Bleat with ID = " + str(ID) + " does not exist"}), 201
-        else :
+            return jsonify({"message": "The Bleat with ID = " + str(ID) + " does not exist"}), 201
+        else:
             db.session.delete(bleat_del)
             db.session.commit()
-            return jsonify({"message":"The Bleat with ID = " + str(ID) + " as been successfully removed"}), 200
+            return jsonify({"message": "The Bleat with ID = " + str(ID) + " as been successfully removed"}), 200
     except Exception as e:
-        return jsonify({"error" : "Failed, caught exception " + str(e)}), 400
+        return jsonify({"error": "Failed, caught exception " + str(e)}), 400
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -184,27 +194,28 @@ def signup():
     if request.method == "GET":
         return render_template("signup.html")
     else:
-        email = request.form ["email"]
-        username = request.form ["username"]
-        location = request.form ["location"]
-        pwd = request.form ["password"]
-        pwd_c = request.form ["password_c"]
+        email = request.form["email"]
+        username = request.form["username"]
+        location = request.form["location"]
+        pwd = request.form["password"]
+        pwd_c = request.form["password_c"]
 
         if (pwd != pwd_c):
-            flash("Passwords are different","info")
+            flash("Passwords are different", "info")
             return redirect(url_for("signup"))
 
         user = User.query.filter_by(email=email).first()
         if user:
-            flash('Email address already exists',"info")
+            flash('Email address already exists', "info")
             return redirect(url_for("signup"))
         else:
             new_user = User(email=email, username=username,
                             location=location, pwd=hash_password(pwd))
             db.session.add(new_user)
             db.session.commit()
-            flash("Record was successfully added","info")
+            flash("Record was successfully added", "info")
             return render_template("signin.html"), 200  # put signin
+
 
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
@@ -213,14 +224,23 @@ def signin():
         return render_template("signin.html")
 
     else:
-        email = request.form["email"]
-        password = request.form["password"] #Recuperation du form
 
-    user = User.query.filter_by(email=email).first() #Check if user exist
+        email = request.form["email"]
+        password = request.form["password"]  # Recuperation du form
+
+    users = User.query.all()
+    D = dict()
+    for i in range(len(users)):
+        D[users[i].email] = users[i]  # tuple email - user
+
+    user = D[email]  # Check if email exists
+
     if user:
-        if hash_password(password) == user.pwd: #If yes check if this is the right password
-            session["current_user"] = user.id # the session.current_user keep the id user, it will be custom the user experience
-            return render_template("post_a_bleat.html")
+        # If yes check if this is the right password
+        if hash_password(password) == user.pwd:
+            # the session.current_user keep the id user of the current session
+            session["current_user"] = user.id
+            return redirect(url_for("home"))
         else:
             flash("Wrong password")
             return render_template("signin.html")
@@ -228,39 +248,42 @@ def signin():
         flash("User does not exist")
         return render_template("signin.html")
 
+
 @app.route("/logout")
 def logout():
-    session.pop("current_user",None)
+    session.pop("current_user", None)
     return redirect(url_for("home"))
 
-@app.route("/post_a_bleat", methods=["GET","POST"])
+
+@app.route("/post_a_bleat", methods=["GET", "POST"])
 def post_a_bleat():
     if request.method == "GET":
         return render_template("post_a_bleat.html")
     else:
         if session.get('current_user') is None:
             return render_template("signin.html")
-        else :
-            id_user = session.get('current_user',None)
+        else:
+            id_user = session.get('current_user', None)
             if id_user is None:
-                flash("Feature not available without connection","info")
+                flash("Feature not available without connection", "info")
                 return redirect(url_for("signin"))
             else:
                 title = request.form["title"]
                 content = request.form["content"]
 
-                user = User.query.filter_by(id=id_user).first() # get the user associated to the id
+                # get the user associated to the id
+                user = User.query.filter_by(id=id_user).first()
                 if not user:
                     flash("User with " + id_user + " does not exist")
-                    return render_template("post_a_bleat.html")
+                    return redirect(url_for("post_a_bleat"))
                 else:
-                    new_bleat = Bleat(title = title, content = content, author_id = int(id_user)
-                    ,like=0,retweet=0,reply=0, date = datetime.datetime.now())
+                    new_bleat = Bleat(title=title, content=content, author_id=int(
+                        id_user), like=0, retweet=0, reply=0, date=datetime.datetime.now())
 
                     db.session.add(new_bleat)
                     db.session.commit()
-                    flash("Message was successfully added","info")
-                    return redirect(url_for("home"))
+                    flash("Message was successfully added", "info")
+                    return redirect(url_for("home_user"))
 
 
 @app.route("/users", methods=["GET"])
@@ -282,33 +305,33 @@ def home_user():
         name = []
         date = []
         for t in bleats:
-            name.append(User.query.filter_by(id = t.author_id).first().username)
-            message.append(t.title +" : " + t.content)
+            name.append(User.query.filter_by(id=t.author_id).first().username)
+            message.append(t.title + " : " + t.content)
             date.append(t.date[0:10] + " at  " + t.date[11:19])
-        return render_template("home_page.html", len = len(message), message=message, name=name, date=date)
+        return render_template("home_page.html", len=len(message), message=message, name=name, date=date)
 
-
-from data_struct import LinkedList
 
 """function to get the friends of a given user"""
-@app.route("/user/<int:ID>/friends",methods=["GET"])
+
+
+@app.route("/user/<int:ID>/friends", methods=["GET"])
 def friends_of(ID):
-    users = User.query.all() # load the users in the memory
-    friends = Relationship.query.all() # load all the relationship data in the memory
+    users = User.query.all()  # load the users in the memory
+    friends = Relationship.query.all()  # load all the relationship data in the memory
     # implement a hash function with direct chaining to store the relation ship
 
-    T  = HashTable(len(users))
+    T = HashTable(len(users))
     for i in range(len(users)):
-        T.put(users[i].id,users[i])
+        T.put(users[i].id, users[i])
 
-    r = dict() # r is a hashmap of linkedList
+    r = dict()  # r is a hashmap of linkedList
     for ele in friends:
-        if ele.pending is True: # pending = True : relation / pending = 0 : not yet
+        if ele.pending is True:  # pending = True : relation / pending = 0 : not yet
             f = {
-                    "id" : T[ele.userID2].id,
-                    "username" : T[ele.userID2].username,
-                    "email" : T[ele.userID2].email,
-                    "location" : T[ele.userID2].location
+                "id": T[ele.userID2].id,
+                "username": T[ele.userID2].username,
+                "email": T[ele.userID2].email,
+                "location": T[ele.userID2].location
             }
 
             if not(ele.userID1 in r.keys()):
@@ -317,10 +340,69 @@ def friends_of(ID):
             else:
                 r[ele.userID1].insert_at_end(f)
 
-
     return jsonify(r[ID].to_list()), 200
 
-@app.route("/bleats/<word>",methods=["GET"])
+
+""" fonction showing friends and pending invitation   """
+""" To do that we use a sparse matrix to store a digraph of relationships between users """
+""" more users there are in the database sparser the matrix relation will be, so we use this special datastructure 
+to gain storage space and computing time"""
+
+
+@app.route("/user/friends", methods=["GET"])
+def show_friends():
+    user_id = session.get('current_user')
+    if user_id is None:
+        return render_template("signin.html")
+    users = User.query.all()  # load the users in the memory
+    friends = Relationship.query.all()  # load all the relationship data in the memory
+    # implement a hash function with direct chaining to store the relation ship
+
+    # hash map storing all users accessible by their id
+    U = dict()
+    for u in users:
+        U[u.id] = {"id" : u.id,
+            "username": u.username,
+                   "email": u.email,
+                   "location": u.location}
+    name = U[user_id]["username"]
+    coord_1 = np.array([])
+    coord_2 = np.array([])
+    data = np.array([], dtype=np.int8)
+    for rel in friends:
+        coord_1 = np.append(coord_1, int(rel.userID1))
+        coord_2 = np.append(coord_2, int(rel.userID2))
+        if rel.pending == False:
+            data = np.append(data, 1)
+        else:
+            data = np.append(data, 2)
+    # create a sparse matrix that stores the relationships
+    Rel_sparse_mat = sp.sparse.coo_matrix(
+        (data, (coord_1, coord_2)), shape=(len(U), len(U)))
+    # add missing zeros
+    r = Rel_sparse_mat.todense()
+
+    # the row represents friends of the current user
+    friends_of_user = r[user_id]
+    # the column represents who is friends or want to be friend with the current user
+    future_friends_of_user = r[:, user_id].T
+
+    F, I, W = [], [], []
+
+    for i in range(len(U)):
+
+        if friends_of_user[0, i] == 2:  # friends
+            F.append(U[i])
+        if friends_of_user[0, i] == 1:  # current user invite him
+            I.append(U[i])
+        # want to be friend with current user
+        if future_friends_of_user[0, i] == 1:
+            W.append(U[i])
+    
+    return render_template("friends.html", name=name, F=F, I=I, W=W)
+
+
+@app.route("/bleats/<word>", methods=["GET"])
 def find_bleat_word(word):
     # get the bleat
     users = User.query.all()
@@ -331,24 +413,24 @@ def find_bleat_word(word):
     bleats = Bleat.query.all()
     bleat_ll = LinkedList()
     for b in bleats:
-        bl = { "title": b.title,
-            "content" : b.content,
-            "author" : d[int(b.author_id)],
-            "like" :  b.like,
-            "retweet" : b.retweet,
-            "reply" : b.reply,
-            "date" : b.date
-         }
+        bl = {"title": b.title,
+              "content": b.content,
+              "author": d[int(b.author_id)],
+              "like":  b.like,
+              "retweet": b.retweet,
+              "reply": b.reply,
+              "date": b.date
+              }
         bleat_ll.insert_beginning(bl)
 
-    temp = bleat_ll.head # start a the head of the linkedList
+    temp = bleat_ll.head  # start a the head of the linkedList
     prev = None
 
     while (temp != None and temp.data["content"].find(word + " ") == -1):
         head_ref = temp.next_node
         temp = head_ref
 
-    while (temp != None): # programming a remove function under condition
+    while (temp != None):  # programming a remove function under condition
         while (temp != None and temp.data["content"].find(word + " ") != -1):
             prev = temp
             temp = temp.next_node
@@ -359,9 +441,10 @@ def find_bleat_word(word):
         prev.next_node = temp.next_node
         temp = prev.next_node
 
-    bleat_ll.head = head_ref # this the head of the linked list
+    bleat_ll.head = head_ref  # this the head of the linked list
     b_list = bleat_ll.to_list()
-    return render_template("show_bleats.html", b_list = b_list)
+    return render_template("show_bleats.html", b_list=b_list)
+
 
 @app.route("/profile", methods=["GET"])
 def profile():
@@ -369,7 +452,7 @@ def profile():
         cur_id = session.get("current_user")
         users = User.query.all()
 
-        current_user = User.query.filter_by(id = cur_id).first()
+        current_user = User.query.filter_by(id=cur_id).first()
         username = current_user.username
         location = current_user.location
         bleats = current_user.bleats
@@ -378,17 +461,16 @@ def profile():
         date = []
 
         for t in bleats:
-            message.append(t.title +" : " + t.content)
+            message.append(t.title + " : " + t.content)
             date.append(t.date[0:10] + " at  " + t.date[11:19])
 
-
-        return render_template("profile.html", len=len(message), username = username, location=location, message = message, date=date)
+        return render_template("profile.html", len=len(message), username=username, location=location, message=message, date=date)
 
 
 if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-    app.debug = True 
+    app.debug = True
     app.env = "development"
     app.run(host="localhost", port="5000")
