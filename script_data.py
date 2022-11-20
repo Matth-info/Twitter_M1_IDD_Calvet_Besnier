@@ -1,5 +1,7 @@
 # Script to fill the database
 
+
+from sqlalchemy import and_
 from lorem_text import lorem
 import random
 from names_dataset import NameDataset
@@ -65,7 +67,6 @@ class User(db.Model):
         return '<Id %r>' % self.id + '<Name %r>' % self.username + '<email %r>' % self.email + '<location %r>' % self.location
 
 
-
 class Relationship(db.Model):
     __tablename__ = "Relationship"
     id = db.Column(db.Integer, primary_key=True)
@@ -74,7 +75,7 @@ class Relationship(db.Model):
     CheckConstraint("userID1 != userID2", name="check1")
     date = db.Column(db.String(256))
     pending = db.Column(db.Boolean)
-   
+
 
 def hash_password(pwd):
     # we use sha256 hashfunction to hash the password
@@ -112,7 +113,7 @@ def generate_bleat(n=1000):
     size = len(User.query.all())
     for i in range(n):
         author_id = random.randint(1, size - 1)
-        if User.query.filter_by(id = author_id).first():
+        if User.query.filter_by(id=author_id).first():
             content = lorem.words(10)
             title = lorem.words(1)
             like = random.randint(0, 100)
@@ -120,31 +121,35 @@ def generate_bleat(n=1000):
             reply = 0  # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
             date = datetime.datetime.now()
             new_bleat = Bleat(title=title, content=content, author_id=author_id,
-                            like=like, retweet=retweet, reply=reply, date=date)
+                              like=like, retweet=retweet, reply=reply, date=date)
             db.session.add(new_bleat)
             db.session.commit()
     return "success"
 
-from sqlalchemy import and_
+
 def generate_relationship(n=200):
     size = len(User.query.all())
     for i in range(n):
-        id1 , id2 = random.randint(1, size-1), random.randint(1, size-1)
-        if not db.session.query(Relationship).filter(and_(Relationship.userID1 == id1, Relationship.userID2 == id2 )).first():
-            if id1 != id2 and User.query.filter_by(id = id1).first() and User.query.filter_by(id = id2).first():
+        id1, id2 = random.randint(1, size-1), random.randint(1, size-1)
+        if not db.session.query(Relationship).filter(and_(Relationship.userID1 == id1, Relationship.userID2 == id2)).first():
+            if id1 != id2 and User.query.filter_by(id=id1).first() and User.query.filter_by(id=id2).first():
                 p = bool(random.randint(0, 1))
                 date = datetime.datetime.now()
-                if p is True :
-                    
-                    db.session.add(Relationship(userID1 = id1, userID2 = id2, date = date, pending = p ))
-                    db.session.add(Relationship(userID1 = id2, userID2 = id1, date = date, pending = p ))
+                if p is True:
+
+                    db.session.add(Relationship(
+                        userID1=id1, userID2=id2, date=date, pending=p))
+                    db.session.add(Relationship(
+                        userID1=id2, userID2=id1, date=date, pending=p))
                 else:
-                    db.session.add(Relationship(userID1 = id1, userID2 = id2, date = date, pending = p ))
-                db.session.commit()    
+                    db.session.add(Relationship(
+                        userID1=id1, userID2=id2, date=date, pending=p))
+                db.session.commit()
     return "success"
 
+
 if __name__ == "__main__":
-    pass
-    #print(generate_users())
-    #print(generate_bleat())
-    #print(generate_relationship())
+
+    # print(generate_users())
+    # print(generate_bleat())
+    # print(generate_relationship())
