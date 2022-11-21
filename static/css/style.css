@@ -5,6 +5,11 @@ h1 {
     text-align: left;
     padding: 10px;
 }
+
+.feed{
+    margin-top: 20px;
+}
+
 nav a {
     color: #009CFA;
     font-size: 3em;
@@ -34,50 +39,62 @@ input[type=text]{
 
 .sidenav_left {
     height: 100%;
-    width: 160px;
+    width: 25%;
     position: fixed;
-    top: 70;
+    top: 200;
     left: 0;
     overflow-x: hidden;
     padding-top: 20px;
-    border-right: 2px solid rgb(241, 153, 0);
+    border-right: 1px solid rgb(241, 153, 0);
     border-top: 2px solid rgb(241, 153, 0);
     border-radius: 5px;
 }
 
 .sidenav_right {
     height: 100%;
-    width: 200px;
+    width: 25%;
     position: fixed;
-    top: 70;
+    top: 200;
     right: 0;
     overflow-x: hidden;
     padding-top: 20px;
-    border-left: 2px solid rgb(241, 153, 0);
+    border-left: 1px solid rgb(241, 153, 0);
     border-top: 2px solid rgb(241, 153, 0);
     border-radius: 5px;
 }
   
 .sidenav_left a {
     padding: 6px 8px 6px 16px;
+    text-align: center;
     text-decoration: none;
     font-size: 25px;
-    color: #023047;
-    display: block;
+    border-radius: 10px 10px 10px 10px;
+    color: #000000;
 }
   
 .sidenav_left a:hover {
-    color: #f454f1;
+    background-color: rgb(247, 249, 249);
 }
 
 .main {
-    margin-left: 160px; /* Same as the width of the sidebar */
-    margin-right: 200px; /*Same as the width of the right sizebar*/
+    margin-left: 17%; /* Same as the width of the left sidebar */
+    margin-right: 17%; /*Same as the width of the right sizebar*/
+    margin-top: 200px;
     padding: 0px 10px;
   }
 
 .bleat {
-    border: 1px solid rgb(241, 153, 0);
-    border-radius: 5px;
-    margin-top: 3px;
+    border-top: 1px solid rgb(241, 153, 0);
+}
+
+.bleat:hover{
+    background-color: rgb(247, 249, 249);
+}
+
+.pp{
+    width: 6%;
+    height: 6%;
+    margin-top: 10px;
+    margin-right: 10px;
+    float: left;
 }
