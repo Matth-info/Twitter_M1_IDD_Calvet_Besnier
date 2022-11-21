@@ -233,9 +233,8 @@ def signin():
     for i in range(len(users)):
         D[users[i].email] = users[i]  # tuple email - user
 
-    user = D[email]  # Check if email exists
-
-    if user:
+    if email in D.keys():
+        user = D[email]  # Check if email exists
         # If yes check if this is the right password
         if hash_password(password) == user.pwd:
             # the session.current_user keep the id user of the current session
@@ -299,8 +298,18 @@ def about():
 
 @app.route("/home_page", methods=["GET"])
 def home_user():
+
+    # chronological order
+    # only friend bleats
+
     if request.method == "GET":
         bleats = Bleat.query.all()
+        # p = priorityQueue()
+
+        for ele in bleats:
+
+            pass
+
         message = []
         name = []
         date = []
@@ -361,8 +370,8 @@ def show_friends():
     # hash map storing all users accessible by their id
     U = dict()
     for u in users:
-        U[u.id] = {"id" : u.id,
-            "username": u.username,
+        U[u.id] = {"id": u.id,
+                   "username": u.username,
                    "email": u.email,
                    "location": u.location}
     name = U[user_id]["username"]
