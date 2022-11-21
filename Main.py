@@ -299,21 +299,34 @@ def about():
 @app.route("/home_page", methods=["GET"])
 def home_user():
 
-    # chronological order
-    # only friend bleats
-
     if request.method == "GET":
+
+        #Recup friend's id list
+        relation = Relationship.query.all()
+        friend_id = []
+
+        user_id = session.get('current_user')
+
+        for ele in relation:
+            if ele.userID1 == user_id and ele.pending:
+                friend_id.append(ele.userID2)
+
+        #Recup friend's bleat
         bleats = Bleat.query.all()
-        # p = priorityQueue()
-
+        friend_bleats = []
+        
         for ele in bleats:
+            if ele.author_id in friend_id:
+                friend_bleats.append(ele)
 
-            pass
+        #Sort it by youngest to oldest
+        sorted(friend_bleats, key=lambda friend_bleats: friend_bleats.date)
+        friend_bleats.reverse()
 
         message = []
         name = []
         date = []
-        for t in bleats:
+        for t in friend_bleats:
             name.append(User.query.filter_by(id=t.author_id).first().username)
             message.append(t.title + " : " + t.content)
             date.append(t.date[0:10] + " at  " + t.date[11:19])
