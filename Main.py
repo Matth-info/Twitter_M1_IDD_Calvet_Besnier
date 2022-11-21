@@ -296,7 +296,7 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/home_page", methods=["GET"])
+@app.route("/home_page", methods=["GET", "POST"])
 def home_user():
 
     if request.method == "GET":
@@ -332,6 +332,33 @@ def home_user():
             date.append(t.date[0:10] + " at  " + t.date[11:19])
         return render_template("home_page.html", len=len(message), message=message, name=name, date=date)
 
+    if request.method == "POST": #Method = POST
+        
+        word = request.form["research"]
+
+        #First find all profile with username same as searched word
+        users = User.query.all()
+        user_search = []
+        for ele in users:
+            if ele.username.lower() == word.lower():
+                user_search.append(ele.username)
+
+        #Now find all bleat with the searched word inside
+        d_search = dict()
+        bleats = Bleat.query.all()
+
+        #Create the dict {word: [all bleats containing word]}
+        for bleat in bleats:
+            for j in bleat.content.split():
+                if not d_search.get(j):
+                    d_search[j] = [bleat]
+                else:
+                    d_search[j].append(bleat)
+
+        #Recup in O(1) all bleat
+        bleat_searched = d_search[word]
+
+        return render_template("show_bleats.html", b_list=bleat_searched)
 
 """function to get the friends of a given user"""
 
@@ -422,50 +449,6 @@ def show_friends():
             W.append(U[i])
 
     return render_template("friends.html", name=name, F=F, I=I, W=W)
-
-
-@app.route("/bleats/<word>", methods=["GET"])
-def find_bleat_word(word):
-    # get the bleat
-    users = User.query.all()
-    d = dict()
-    for i in range(len(users)):
-        d[users[i].id] = users[i].username
-
-    bleats = Bleat.query.all()
-    bleat_ll = LinkedList()
-    for b in bleats:
-        bl = {"title": b.title,
-              "content": b.content,
-              "author": d[int(b.author_id)],
-              "like":  b.like,
-              "retweet": b.retweet,
-              "reply": b.reply,
-              "date": b.date
-              }
-        bleat_ll.insert_beginning(bl)
-
-    temp = bleat_ll.head  # start a the head of the linkedList
-    prev = None
-
-    while (temp != None and temp.data["content"].find(word + " ") == -1):
-        head_ref = temp.next_node
-        temp = head_ref
-
-    while (temp != None):  # programming a remove function under condition
-        while (temp != None and temp.data["content"].find(word + " ") != -1):
-            prev = temp
-            temp = temp.next_node
-
-        if (temp == None):
-            break
-
-        prev.next_node = temp.next_node
-        temp = prev.next_node
-
-    bleat_ll.head = head_ref  # this the head of the linked list
-    b_list = bleat_ll.to_list()
-    return render_template("show_bleats.html", b_list=b_list)
 
 
 @app.route("/profile", methods=["GET"])
