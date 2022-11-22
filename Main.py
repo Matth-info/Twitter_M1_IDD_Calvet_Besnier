@@ -214,7 +214,7 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
             flash("Record was successfully added", "info")
-            return render_template("signin.html"), 200  # put signin
+            return render_template("signin.html"), 200
 
 
 @app.route("/signin", methods=["GET", "POST"])
@@ -224,12 +224,11 @@ def signin():
         return render_template("signin.html")
 
     else:
-
         email = request.form["email"]
         password = request.form["password"]  # Recuperation du form
 
     users = User.query.all()
-    D = dict()
+    D = dict() #Tuple email - user
     for i in range(len(users)):
         D[users[i].email] = users[i]  # tuple email - user
 
@@ -335,13 +334,17 @@ def home_user():
     if request.method == "POST": #Method = POST
         
         word = request.form["research"]
+        user_index = {}
 
         #First find all profile with username same as searched word
         users = User.query.all()
-        user_search = []
+        user_found = {}
         for ele in users:
-            if ele.username.lower() == word.lower():
-                user_search.append(ele.username)
+            user_index[ele.id] = ele #Create user_index
+
+            if ele.username.lower() == word.lower(): #Search if word user exist
+                path = '/profile/' + str(ele.id)
+                user_found[ele] = path
 
         #Now find all bleat with the searched word inside
         d_search = dict()
@@ -356,9 +359,12 @@ def home_user():
                     d_search[j].append(bleat)
 
         #Recup in O(1) all bleat
-        bleat_searched = d_search[word]
+        if d_search.get(word):
+            bleat_found = d_search[word]
+        else:
+            bleat_found = []
 
-        return render_template("show_bleats.html", b_list=bleat_searched)
+        return render_template("research.html", user_found = user_found, b_list=bleat_found, user_index=user_index)
 
 """function to get the friends of a given user"""
 
@@ -451,16 +457,37 @@ def show_friends():
     return render_template("friends.html", name=name, F=F, I=I, W=W)
 
 
-@app.route("/profile", methods=["GET"])
+@app.route("/my_profile", methods=["GET"])
 def profile():
     if request.method == "GET":
         cur_id = session.get("current_user")
         users = User.query.all()
 
         current_user = User.query.filter_by(id=cur_id).first()
+        #current_user = session["user_index"].get(cur_id)
         username = current_user.username
         location = current_user.location
         bleats = current_user.bleats
+
+        message = []
+        date = []
+
+        for t in bleats:
+            message.append(t.title + " : " + t.content)
+            date.append(t.date[0:10] + " at  " + t.date[11:19])
+
+        return render_template("profile.html", len=len(message), username=username, location=location, message=message, date=date)
+
+@app.route("/profile/<int:ID>", methods=["GET"])
+def profile_user(ID):
+    if request.method == "GET":
+        users = User.query.all()
+
+        user_searched = User.query.filter_by(id=ID).first()
+        #user_searched = session["user_index"].get(ID)
+        username = user_searched.username
+        location = user_searched.location
+        bleats = user_searched.bleats
 
         message = []
         date = []
