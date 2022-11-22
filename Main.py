@@ -1,3 +1,4 @@
+from sqlalchemy import update
 import numpy as np
 from scipy.sparse import csr_matrix
 import scipy as sp
@@ -6,7 +7,7 @@ from sqlite3 import Connection as SQLite3Connection
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
                    url_for, g, session)
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
+from sqlalchemy import PrimaryKeyConstraint, CheckConstraint, UniqueConstraint
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 import datetime
@@ -72,8 +73,8 @@ class Relationship(db.Model):
     userID1 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     userID2 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     CheckConstraint("userID1 != userID2", name="check1")
-    date = db.Column(db.String(256))
-    pending = db.Column(db.Boolean)
+    date = db.Column(db.String(256), nullable=False)
+    pending = db.Column(db.Boolean, nullable=False)
 
 
 @app.route("/")  # testing root
@@ -99,7 +100,7 @@ def create_user():
 
 @app.route("/users/<int:ID>", methods=["GET", "POST", "DELETE"])
 def users(ID):
-    #users = User.query.all()
+    # users = User.query.all()
 
     if (request.method == "GET"):
         user = User.query.filter_by(id=ID).first()
@@ -374,6 +375,7 @@ def show_friends():
                    "username": u.username,
                    "email": u.email,
                    "location": u.location}
+
     name = U[user_id]["username"]
     coord_1 = np.array([])
     coord_2 = np.array([])
@@ -455,7 +457,31 @@ def find_bleat_word(word):
     return render_template("show_bleats.html", b_list=b_list)
 
 
-@app.route("/profile", methods=["GET"])
+@app.route("/user/friends/<int:id>", methods=["GET", "POST"])
+def accept_friends(id):
+    if request.method == "GET":
+        redirect(url_for("show_friends"))
+    else:
+        user_id = session.get('current_user')
+        if user_id is None:
+            return render_template("signin.html")
+        else:
+            rela = Relationship.query.filter(
+                (Relationship.userID1 == int(user_id)) & (Relationship.userID2 == id)).first()
+            if rela:
+                flash("Error : Relationship already exists", "error")
+                return redirect(url_for("show_friends"))
+            else:
+                db.session.query(Relationship).filter((Relationship.userID1 == id) & (
+                    Relationship.userID2 == user_id)).update({'pending': True})
+
+                db.session.add(Relationship(userID1=int(user_id), userID2=id,
+                                            date=datetime.datetime.now(), pending=True))
+                db.session.commit()
+                return redirect(url_for("show_friends"))
+
+
+@ app.route("/profile", methods=["GET"])
 def profile():
     if request.method == "GET":
         cur_id = session.get("current_user")
