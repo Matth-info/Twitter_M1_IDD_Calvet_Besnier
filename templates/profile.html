@@ -12,13 +12,13 @@
 
 <div class="main">
 
-    {%for i in range(0, len)%}
+    {%for i in range(len, 0, -1)%}
     <div class="bleat">
         <p><strong>{{username}}</strong></p>
         <p>{{message[i]}}</p>
         <p>{{date[i]}}</p>
+        <hr>
     </div>
-
     {%endfor%}
 </div>
 

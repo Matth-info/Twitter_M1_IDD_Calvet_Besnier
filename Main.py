@@ -215,7 +215,7 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
             flash("Record was successfully added", "info")
-            return render_template("signin.html"), 200  # put signin
+            return render_template("signin.html"), 200
 
 
 @app.route("/signin", methods=["GET", "POST"])
@@ -225,12 +225,11 @@ def signin():
         return render_template("signin.html")
 
     else:
-
         email = request.form["email"]
         password = request.form["password"]  # Recuperation du form
 
     users = User.query.all()
-    D = dict()
+    D = dict()  # Tuple email - user
     for i in range(len(users)):
         D[users[i].email] = users[i]  # tuple email - user
 
@@ -297,28 +296,76 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/home_page", methods=["GET"])
+@app.route("/home_page", methods=["GET", "POST"])
 def home_user():
 
-    # chronological order
-    # only friend bleats
-
     if request.method == "GET":
+
+        # Recup friend's id list
+        relation = Relationship.query.all()
+        friend_id = []
+
+        user_id = session.get('current_user')
+
+        for ele in relation:
+            if ele.userID1 == user_id and ele.pending:
+                friend_id.append(ele.userID2)
+
+        # Recup friend's bleat
         bleats = Bleat.query.all()
-        # p = priorityQueue()
+        friend_bleats = []
 
         for ele in bleats:
+            if ele.author_id in friend_id:
+                friend_bleats.append(ele)
 
-            pass
+        # Sort it by youngest to oldest
+        sorted(friend_bleats, key=lambda friend_bleats: friend_bleats.date)
+        friend_bleats.reverse()
 
         message = []
         name = []
         date = []
-        for t in bleats:
+        for t in friend_bleats:
             name.append(User.query.filter_by(id=t.author_id).first().username)
             message.append(t.title + " : " + t.content)
             date.append(t.date[0:10] + " at  " + t.date[11:19])
         return render_template("home_page.html", len=len(message), message=message, name=name, date=date)
+
+    if request.method == "POST":  # Method = POST
+
+        word = request.form["research"]
+        user_index = {}
+
+        # First find all profile with username same as searched word
+        users = User.query.all()
+        user_found = {}
+        for ele in users:
+            user_index[ele.id] = ele  # Create user_index
+
+            if ele.username.lower() == word.lower():  # Search if word user exist
+                path = '/profile/' + str(ele.id)
+                user_found[ele] = path
+
+        # Now find all bleat with the searched word inside
+        d_search = dict()
+        bleats = Bleat.query.all()
+
+        # Create the dict {word: [all bleats containing word]}
+        for bleat in bleats:
+            for j in bleat.content.split():
+                if not d_search.get(j):
+                    d_search[j] = [bleat]
+                else:
+                    d_search[j].append(bleat)
+
+        # Recup in O(1) all bleat
+        if d_search.get(word):
+            bleat_found = d_search[word]
+        else:
+            bleat_found = []
+
+        return render_template("research.html", user_found=user_found, b_list=bleat_found, user_index=user_index)
 
 
 """function to get the friends of a given user"""
@@ -481,16 +528,38 @@ def accept_friends(id):
                 return redirect(url_for("show_friends"))
 
 
-@ app.route("/profile", methods=["GET"])
+@app.route("/my_profile", methods=["GET"])
 def profile():
     if request.method == "GET":
         cur_id = session.get("current_user")
         users = User.query.all()
 
         current_user = User.query.filter_by(id=cur_id).first()
+        #current_user = session["user_index"].get(cur_id)
         username = current_user.username
         location = current_user.location
         bleats = current_user.bleats
+
+        message = []
+        date = []
+
+        for t in bleats:
+            message.append(t.title + " : " + t.content)
+            date.append(t.date[0:10] + " at  " + t.date[11:19])
+
+        return render_template("profile.html", len=len(message), username=username, location=location, message=message, date=date)
+
+
+@app.route("/profile/<int:ID>", methods=["GET"])
+def profile_user(ID):
+    if request.method == "GET":
+        users = User.query.all()
+
+        user_searched = User.query.filter_by(id=ID).first()
+        #user_searched = session["user_index"].get(ID)
+        username = user_searched.username
+        location = user_searched.location
+        bleats = user_searched.bleats
 
         message = []
         date = []
