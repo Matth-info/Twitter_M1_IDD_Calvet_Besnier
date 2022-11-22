@@ -5,7 +5,7 @@
 {% block main %}
 <div class="container">
     <h1> Friends of {{name}} </h1>
-
+    {%include 'flash.html' %}
     <ul>
         <h3>Current list of friends on Bleatter</h3>
         <span class="badge bg-primary rounded-pill"> {{F|length}}</span>
@@ -28,7 +28,11 @@
         <span class="badge bg-primary rounded-pill"> {{W|length}}</span>
         {% for ele in W %}
         <li class="list-group-item" aria-current="true">
-            {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}</li>
+            {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}
+            <form action="/user/friends/{{ele['id']}}" method="post">
+                <button class="btn btn-primary" type="submit" name="accept">Accept</button>
+            </form>
+        </li>
         {%endfor%}
     </ul>
 </div>
