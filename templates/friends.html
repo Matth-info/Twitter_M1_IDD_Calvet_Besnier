@@ -3,7 +3,7 @@
 {% block style %}{% endblock %}
 
 {% block main %}
-<div class="container">
+<div class="container-fluid">
     <h1> Friends of {{name}} </h1>
     {%include 'flash.html' %}
     <ul>
@@ -11,8 +11,14 @@
         <span class="badge bg-primary rounded-pill"> {{F|length}}</span>
         {% for ele in F %}
         <li class="list-group-item" aria-current="true">
-            {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}</li>
-        {%endfor%}
+            <form action="/user/remove_friend/{{ele['id']}}" method="post">
+                {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-outline-danger" type="submit" name="accept">Remove</button>
+                </div>
+
+            </form>
+            {%endfor%}
     </ul>
     <ul>
         <h3>Don't lose hope, they will accept you very soon !</h3>
@@ -28,10 +34,28 @@
         <span class="badge bg-primary rounded-pill"> {{W|length}}</span>
         {% for ele in W %}
         <li class="list-group-item" aria-current="true">
-            {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}
             <form action="/user/friends/{{ele['id']}}" method="post">
-                <button class="btn btn-primary" type="submit" name="accept">Accept</button>
+                {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-outline-primary" type="submit" name="accept">Accept</button>
+                </div>
             </form>
+        </li>
+        {%endfor%}
+    </ul>
+    <ul>
+        <h3>Friend suggestions</h3>
+        {% for ele in FF %}
+        <li class="list-group-item" aria-current="true">
+            <form action="/user/friend_request/{{ele['id']}}" method="post">
+                {{ele["username"]}} with {{ele["email"]}} from {{ele["location"]}}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-outline-primary" type="submit" name="friend_request">Send a friend
+                        request</button>
+                </div>
+
+            </form>
+
         </li>
         {%endfor%}
     </ul>
