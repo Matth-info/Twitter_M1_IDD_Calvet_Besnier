@@ -1,5 +1,6 @@
 # Twitter_M1_IDD_Calvet_Besnier
 Algo and Advanced programming project in M1 IDD , PSL Paris Dauphine University 2022-2023
+Authors : Hugo Calvet and Matthias Besnier
 
 Goal : The goal of this project is to recreate some Twitter features using API to communicate between our local web server and database. We're focusing on using
 the best data structures to store and process the data depending on the features that we choose to implement.  
@@ -21,3 +22,5 @@ Signup
 Home : access to the bleats of friends and search words in bleats or profile in Bleatter User database
 
 The developement process is still ongoing.
+
+Bonus : You should be able to hear a goat bleatting when you push the button submit in the post a bleat
