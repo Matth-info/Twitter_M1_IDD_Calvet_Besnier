@@ -147,9 +147,7 @@ def generate_relationship(n=200):
                 db.session.commit()
     return "success"
 
-
 if __name__ == "__main__":
-
     # print(generate_users())
     # print(generate_bleat())
     # print(generate_relationship())
