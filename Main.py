@@ -319,7 +319,7 @@ def home_user():
             if ele.author_id in friend_id:
                 friend_bleats.append(ele)
 
-        # Sort it by youngest to oldest
+        # Sort it from youngest to oldest
         sorted(friend_bleats, key=lambda friend_bleats: friend_bleats.date)
         friend_bleats.reverse()
 
@@ -334,7 +334,7 @@ def home_user():
 
     if request.method == "POST":  # Method = POST
 
-        word = request.form["research"]
+        word = request.form["search"]
         user_index = {}
 
         # First find all profile with username same as searched word
@@ -351,27 +351,29 @@ def home_user():
         d_search = dict()
         bleats = Bleat.query.all()
 
-        # Create the dict {word: [all bleats containing word]}
+        # Create the dict {word: linkedlist of all bleats containing word]}
         for bleat in bleats:
-            for j in bleat.content.split():
-                if not d_search.get(j):
-                    d_search[j] = [bleat]
+            for w in bleat.content.split():
+                if not d_search.get(w):
+                    d_search[w] = LinkedList()
+                    d_search[w].insert_at_end(bleat)
                 else:
-                    d_search[j].append(bleat)
+                    d_search[w].insert_at_end(bleat)
 
         # Recup in O(1) all bleat
         if d_search.get(word):
-            bleat_found = d_search[word]
+            # transform our linkedList to list
+            bleat_found = d_search[word].to_list()
         else:
             bleat_found = []
 
-        return render_template("research.html", user_found=user_found, b_list=bleat_found, user_index=user_index)
+        return render_template("search.html", user_found=user_found, b_list=bleat_found, user_index=user_index)
 
 
 """function to get the friends of a given user"""
 
 
-@app.route("/user/<int:ID>/friends", methods=["GET"])
+@app.route("/api/user/<int:ID>/friends", methods=["GET"])
 def friends_of(ID):
     users = User.query.all()  # load the users in the memory
     friends = Relationship.query.all()  # load all the relationship data in the memory
@@ -397,7 +399,7 @@ def friends_of(ID):
             else:
                 r[ele.userID1].insert_at_end(f)
 
-    return jsonify(r[ID].to_list()), 200
+    return r[ID].to_list()
 
 
 """ fonction showing friends and pending invitation   """
@@ -445,19 +447,28 @@ def show_friends():
     # the column represents who is friends or want to be friend with the current user
     future_friends_of_user = r[:, user_id].T
 
-    F, I, W = [], [], []
-
+    F, I, W = [], dict(), dict()
+    # using dictionary help to avoid dealing with dublicates
     for i in range(len(U)):
 
         if friends_of_user[0, i] == 2:  # friends
             F.append(U[i])
         if friends_of_user[0, i] == 1:  # current user invite him
-            I.append(U[i])
+            I[U[i]["id"]] = U[i]
         # want to be friend with current user
         if future_friends_of_user[0, i] == 1:
-            W.append(U[i])
+            W[U[i]["id"]] = U[i]
 
-    return render_template("friends.html", name=name, F=F, I=I, W=W)
+    # using a dictionary (duplicate are not allowed) to avoid putting 2 times the friend of friend of the current user
+    # set are not usable here because it needs unmutable object which is not the case for a dictionary
+
+    FF = dict()
+    for f in F:
+        for ff in friends_of(f["id"]):  # list of dictionaries
+            if not (ff["id"] == user_id or ff["id"] in FF.keys() or ff["id"] in I.keys() or ff["id"] in W.keys()):
+                FF[ff["id"]] = ff
+
+    return render_template("friends.html", name=name, F=F, I=list(I.values()), W=list(W.values()), FF=list(FF.values()))
 
 
 @app.route("/bleats/<word>", methods=["GET"])
@@ -528,6 +539,47 @@ def accept_friends(id):
                 return redirect(url_for("show_friends"))
 
 
+@app.route("/user/friend_request/<int:id>", methods=["GET", "POST"])
+def friend_request(id):
+    if request.method == "GET":
+        return redirect(url_for("show_friends"))
+    else:
+        user_id = session.get('current_user')
+        if user_id is None:
+            return render_template("signin.html")
+        else:
+            rela = Relationship.query.filter(
+                (Relationship.userID1 == int(user_id)) & (Relationship.userID2 == id)).first()
+            if rela:
+                flash("Error : Relationship already exists", "error")
+                return redirect(url_for("show_friends"))
+            else:
+                db.session.add(Relationship(userID1=int(user_id), userID2=id,
+                                            date=datetime.datetime.now(), pending=False))
+                db.session.commit()
+                return redirect(url_for("show_friends"))
+
+
+@app.route("/user/remove_friend/<int:ID>", methods=["POST"])
+def remove_friend(ID):
+    if request.method == "POST":
+        user_id = session.get("current_user")
+        if user_id is None:
+            return render_template("signin.html")
+        else:
+            rela1 = Relationship.query.filter(
+                (Relationship.userID1 == int(user_id)) & (Relationship.userID2 == ID)).first()
+            rela2 = Relationship.query.filter(
+                (Relationship.userID1 == ID) & (Relationship.userID2 == int(user_id))).first()
+            print(rela1)
+            print(rela2)
+            if rela1 and rela2:
+                db.session.delete(rela1)
+                db.session.delete(rela2)
+                db.session.commit()
+            return redirect(url_for("show_friends"))
+
+
 @app.route("/my_profile", methods=["GET"])
 def profile():
     if request.method == "GET":
@@ -535,7 +587,7 @@ def profile():
         users = User.query.all()
 
         current_user = User.query.filter_by(id=cur_id).first()
-        #current_user = session["user_index"].get(cur_id)
+        # current_user = session["user_index"].get(cur_id)
         username = current_user.username
         location = current_user.location
         bleats = current_user.bleats
@@ -556,7 +608,7 @@ def profile_user(ID):
         users = User.query.all()
 
         user_searched = User.query.filter_by(id=ID).first()
-        #user_searched = session["user_index"].get(ID)
+        # user_searched = session["user_index"].get(ID)
         username = user_searched.username
         location = user_searched.location
         bleats = user_searched.bleats
@@ -575,6 +627,6 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-    app.debug = False
+    app.debug = True
     app.env = "development"
     app.run(host="localhost", port="5000")
