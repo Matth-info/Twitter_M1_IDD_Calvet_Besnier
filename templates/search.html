@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}<title> Bleats</title>{% endblock %}
+
+{% block main %}
+
+    <h3>Users :</h3>
+    {%for ele in user_found.keys() %}
+        <a href={{user_found[ele]}}>{{ele["username"]}} </a>
+        <p>{{ele["email"]}}</p>
+    {%endfor%}
+
+    <h3>Bleats :</h3>
+    {%for ele in b_list %}
+        <p><strong>{{user_index[ele.author_id].username}}</strong></p>
+        <p> {{ele["title"]}} :</p>
+        <p> {{ele["content"]}} </p>
+        <p> {{ele["date"]}} </p>
+        <hr>
+    {%endfor%}
+
+{% endblock %}
