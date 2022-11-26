@@ -7,19 +7,31 @@
 
     <h1>Feeds</h1>
 
-    <ul>
-        <div>
-            {%for i in range(0, len)%}
-            <li class="list-group-item">
-                <p>author : {{name[i]}}
-                </p>
-                {{message[i]}}
-                <p>{{date[i]}}</p>
-            </li>
-            {%endfor%}
-        </div>
-    <ul>
-
+    <ul class="list-group">
+        {%for i in range(0, len)%}
+        <li class="list-group-item list-group-item-action flex-column align-items-start">
+            <p>author : {{name[i]}}</p>
+            <p class="mb-1">{{message[i]}}</p>
+            <small>{{date[i]}}</small>
+            <div class="row g-2">
+                <div class="p-1">
+                    <div class="col">
+                        <img src="{{url_for('static', filename='like.png')}}" height="20px" width="20px"> {{like[i]}}
+                    </div>
+                </div>
+                <div class="p-1">
+                    <div class="col">
+                        <img src="{{url_for('static', filename='rebleat.png')}}" height="20px" width="20px">
+                        {{rebleat[i]}}
+                    </div>
+                </div>
+                <div class="p-1">
+                    <div class="col">
+                        <img src="{{url_for('static', filename='reply.png')}}" height="20px" width="20px"> {{reply[i]}}
+                    </div>
+                </div>
+        </li>
+        {%endfor%}
+    </ul>
 </div>
-
 {% endblock %}
