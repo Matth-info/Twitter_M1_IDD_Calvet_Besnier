@@ -282,7 +282,7 @@ def post_a_bleat():
                     db.session.add(new_bleat)
                     db.session.commit()
                     flash("Message was successfully added", "info")
-                    return redirect(url_for("home_user"))
+                    return redirect(url_for("profile"))
 
 
 @app.route("/users", methods=["GET"])
@@ -326,11 +326,21 @@ def home_user():
         message = []
         name = []
         date = []
+        like = []
+        rebleat = []
+        reply = []
+
         for t in friend_bleats:
             name.append(User.query.filter_by(id=t.author_id).first().username)
             message.append(t.title + " : " + t.content)
             date.append(t.date[0:10] + " at  " + t.date[11:19])
-        return render_template("home_page.html", len=len(message), message=message, name=name, date=date)
+            like.append(t.like)
+            rebleat.append(t.retweet)
+            reply.append(t.reply)
+
+            
+        return render_template("home_page.html", len=len(message), message=message, name=name, date=date,like=like
+        ,rebleat=rebleat,reply=reply)
 
     if request.method == "POST":  # Method = POST
 
@@ -426,6 +436,8 @@ def show_friends():
                    "location": u.location}
 
     name = U[user_id]["username"]
+    if len(friends) == 0:
+        return render_template("friends.html", name=name)
     coord_1 = np.array([])
     coord_2 = np.array([])
     data = np.array([], dtype=np.int8)
@@ -586,11 +598,13 @@ def profile():
         cur_id = session.get("current_user")
         users = User.query.all()
 
+        nb_friends = Relationship.query.filter(
+            (Relationship.userID1 == cur_id) & (Relationship.pending == True)).count()
+
         current_user = User.query.filter_by(id=cur_id).first()
         # current_user = session["user_index"].get(cur_id)
-        username = current_user.username
-        location = current_user.location
-        bleats = current_user.bleats
+        bleats = current_user.bleats  # use the foreign key bleats.author to User
+        # get all his bleats
 
         message = []
         date = []
@@ -599,7 +613,7 @@ def profile():
             message.append(t.title + " : " + t.content)
             date.append(t.date[0:10] + " at  " + t.date[11:19])
 
-        return render_template("profile.html", len=len(message), username=username, location=location, message=message, date=date)
+        return render_template("profile.html", email=current_user.email, nb_friends=nb_friends, len=len(message), username=current_user.username, location=current_user.location, message=message, date=date)
 
 
 @app.route("/profile/<int:ID>", methods=["GET"])
