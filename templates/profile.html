@@ -1,25 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}<title>Profil of {{username}}</title>{% endblock %}
-
+{% block title %}<title>Profile</title>{% endblock %}
 {% block main %}
 
-<h1>{{username}}</h1>
-<h3>
-    <img src="https://cdn-icons-png.flaticon.com/512/17/17736.png" height="15px" width="15px">
-    {{location}}
-</h3>
 
-<div class="main">
+<h1>Profile of {{username}}</h1>
+<div class="container text-center">
+    <div class="row g-2">
+        <div class="p-3 border bg-light">
+            <div class="col">
+                <img src="{{url_for('static', filename='icon_profile.png')}}" height="20px" width="20px">{{nb_friends}}
+            </div>
+        </div>
 
-    {%for i in range(len, 0, -1)%}
-    <div class="bleat">
-        <p><strong>{{username}}</strong></p>
-        <p>{{message[i]}}</p>
-        <p>{{date[i]}}</p>
-        <hr>
+        <div class="p-3 border bg-light">
+            <div class="col">
+                <img src="{{url_for('static', filename='id-card.png')}}" height="20px" width="20px">
+                {{email}}
+            </div>
+        </div>
+        <div class="p-3 border bg-light">
+            <div class="col">
+                <img src="https://cdn-icons-png.flaticon.com/512/17/17736.png" height="20px" width="20px">
+                {{location}}
+            </div>
+        </div>
     </div>
-    {%endfor%}
 </div>
+
+<ul class="list-group">
+    {%for i in range(len, 0, -1)%}
+    <li class="list-group-item list-group-item-action flex-column align-items-start">
+
+        <p class="mb-1">{{message[i]}}</p>
+        <small>{{date[i]}}</small>
+    </li>
+    {%endfor%}
+</ul>
+
 
 {% endblock %}
