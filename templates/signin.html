@@ -35,14 +35,16 @@
 <div class="container p-1">
     {%include 'flash.html' %}
 </div>
-<!--class="container p-3 d-flex justify-content-center"-->
+
 <div>
-    <form class="form-inline" action="http://localhost:5000/signin" method="post">
+    <form class="form-group" action="http://localhost:5000/signin" method="post">
         <div class="form-group">
             <label for="email" class="control-label col-sm-2">Email</label>
             <div class="col-sm-10">
                 <input name="email" type="email" class="form-control" id="email" placeholder="Enter your email"
                     required>
+                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
+                    else.</small>
             </div>
         </div>
 
