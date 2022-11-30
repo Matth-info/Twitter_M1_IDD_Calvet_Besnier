@@ -4,5 +4,13 @@
 {% block style %}{% endblock %}
 
 {% block main %}
-<h2>Welcome back {{name}} on Bleatter, where a Tweet is just a Bleat</h2>
+<div class="container-fluid">
+    {%include 'flash.html' %}
+    <div class="text-center">
+        <img src="{{url_for('static', filename='logo1.png')}}" class="center-block" alt="Sample image" />
+    </div>
+    <div>
+        <h1 class="text-center"><b>Welcome back {{name}} on Bleatter, where a Tweet is just a Bleat</b></h1>
+    </div>
+</div>
 {% endblock %}
