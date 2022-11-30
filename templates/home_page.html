@@ -7,9 +7,10 @@
 
     <h1>Feeds</h1>
 
+
     <ul class="list-group">
         {%for i in range(0, len)%}
-        <li class="list-group-item list-group-item-action flex-column align-items-start">
+        <li class="list-group-item list-group-item-action flex-column align-items-start mt-3 shadow p-3 ">
             <p>author : {{name[i]}}</p>
             <p class="mb-1">{{message[i]}}</p>
             <small>{{date[i]}}</small>
