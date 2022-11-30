@@ -42,7 +42,8 @@ class User(db.Model):
     email = db.Column(db.String(64))
     pwd = db.Column(db.String(64))
     location = db.Column(db.String(64))
-    bleats = db.relationship("Bleat", cascade="all, delete")
+    bleats = db.relationship(
+        "Bleat", passive_deletes=True, cascade="all, delete")
 
     def serialize(self):
         return {"id": self.id, "name": self.username, "email": self.email, "location": self.location, "password ": self.pwd}
@@ -56,7 +57,8 @@ class Bleat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
     content = db.Column(db.String(256))
-    author_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey(
+        "User.id", ondelete='CASCADE'), nullable=False)
     like = db.Column(db.Integer)
     retweet = db.Column(db.Integer)
     # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
@@ -69,17 +71,21 @@ class Bleat(db.Model):
 
 class Relationship(db.Model):
     __tablename__ = "Relationship"
-    id = db.Column(db.Integer, primary_key=True)
-    userID1 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
-    userID2 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
-    CheckConstraint("userID1 != userID2", name="check1")
+    userID1 = db.Column(db.Integer, db.ForeignKey(
+        "User.id", ondelete="CASCADE"), nullable=False, primary_key=True)
+    userID2 = db.Column(db.Integer, db.ForeignKey(
+        "User.id", ondelete="CASCADE"), nullable=False, primary_key=True)
     date = db.Column(db.String(256), nullable=False)
     pending = db.Column(db.Boolean, nullable=False)
 
 
 @app.route("/")  # testing root
 def home():
-    return render_template("Bleatter.html")
+    current_user = User.query.filter_by(id=session.get("current_user")).first()
+    if current_user:
+        return render_template("Bleatter.html", name=current_user.username)
+    else:
+        return render_template("Bleatter.html")
 
 
 @app.route("/user", methods=["POST"])  # create user
@@ -338,13 +344,11 @@ def home_user():
             rebleat.append(t.retweet)
             reply.append(t.reply)
 
-            
-        return render_template("home_page.html", len=len(message), message=message, name=name, date=date,like=like
-        ,rebleat=rebleat,reply=reply)
+        return render_template("home_page.html", len=len(message), message=message, name=name, date=date, like=like, rebleat=rebleat, reply=reply)
 
     if request.method == "POST":  # Method = POST
 
-        word = request.form["search"]
+        word = request.form["search"]  # get the data from the form name search
         user_index = {}
 
         # First find all profile with username same as searched word
@@ -606,14 +610,12 @@ def profile():
         bleats = current_user.bleats  # use the foreign key bleats.author to User
         # get all his bleats
 
-        message = []
-        date = []
+        messages = LinkedList()
 
-        for t in bleats:
-            message.append(t.title + " : " + t.content)
-            date.append(t.date[0:10] + " at  " + t.date[11:19])
+        for b in bleats:
+            messages.insert_at_end(b)
 
-        return render_template("profile.html", email=current_user.email, nb_friends=nb_friends, len=len(message), username=current_user.username, location=current_user.location, message=message, date=date)
+        return render_template("profile.html", email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list())
 
 
 @app.route("/profile/<int:ID>", methods=["GET"])
@@ -627,14 +629,44 @@ def profile_user(ID):
         location = user_searched.location
         bleats = user_searched.bleats
 
-        message = []
-        date = []
+        messages = LinkedList()
 
         for t in bleats:
-            message.append(t.title + " : " + t.content)
-            date.append(t.date[0:10] + " at  " + t.date[11:19])
+            messages.insert_at_end(t)
 
-        return render_template("profile.html", len=len(message), username=username, location=location, message=message, date=date)
+        return render_template("profile.html", len=len(messages.to_list()), username=username, location=location, message=messages.to_list())
+
+
+@app.route("/user/remove_bleat/<int:ID>", methods=["POST"])
+def delete_a_user_bleat(ID):
+
+    if request.method == "POST":
+        cur_id = session.get("current_user")
+        current_user = User.query.filter_by(id=cur_id).first()
+
+        bleat_removed = Bleat.query.filter(
+            (Bleat.author_id == cur_id) & (Bleat.id == ID)).first()
+        if bleat_removed is None:
+            flash("You are not allowed to delete this bleat or it does not exist")
+            return redirect(url_for("profile"))
+        else:
+            flash("The Bleat entitled " + bleat_removed.title +
+                  " has been successfully remove from Bleatter")
+            db.session.delete(bleat_removed)
+            db.session.commit()
+            return redirect(url_for("profile"))
+
+
+@app.route("/user/remove_user", methods=["POST"])
+def delete_user():
+    if request.method == "POST":
+        cur_id = session.get("current_user")
+        user = db.session.query(User).filter(User.id == cur_id).first()
+        db.session.delete(user)
+        db.session.commit()
+        flash("Your account have been successfully deleted", "info")
+
+        return redirect(url_for("logout"))
 
 
 if __name__ == "__main__":
