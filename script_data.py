@@ -36,12 +36,30 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 
+class User(db.Model):
+    __tablename__ = "User"
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(24))
+    email = db.Column(db.String(64))
+    pwd = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    bleats = db.relationship(
+        "Bleat", passive_deletes=True, cascade="all, delete")
+
+    def serialize(self):
+        return {"id": self.id, "name": self.username, "email": self.email, "location": self.location, "password ": self.pwd}
+
+    def __repr__(self):
+        return '<Id %r>' % self.id + '<Name %r>' % self.username + '<email %r>' % self.email + '<location %r>' % self.location
+
+
 class Bleat(db.Model):
     __tablename__ = "Bleat"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
     content = db.Column(db.String(256))
-    author_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey(
+        "User.id", ondelete='CASCADE'), nullable=False)
     like = db.Column(db.Integer)
     retweet = db.Column(db.Integer)
     # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
@@ -52,29 +70,14 @@ class Bleat(db.Model):
         return {"title": self.title, "content": self.content}
 
 
-class User(db.Model):
-    __tablename__ = "User"
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(24))
-    email = db.Column(db.String(64))
-    pwd = db.Column(db.String(64))
-    location = db.Column(db.String(64))
-
-    def serialize(self):
-        return {"id": self.id, "name": self.username, "email": self.email, "location": self.location, "password ": self.pwd}
-
-    def __repr__(self):
-        return '<Id %r>' % self.id + '<Name %r>' % self.username + '<email %r>' % self.email + '<location %r>' % self.location
-
-
 class Relationship(db.Model):
     __tablename__ = "Relationship"
-    id = db.Column(db.Integer, primary_key=True)
-    userID1 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
-    userID2 = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
-    CheckConstraint("userID1 != userID2", name="check1")
-    date = db.Column(db.String(256))
-    pending = db.Column(db.Boolean)
+    userID1 = db.Column(db.Integer, db.ForeignKey(
+        "User.id", ondelete="CASCADE"), nullable=False, primary_key=True)
+    userID2 = db.Column(db.Integer, db.ForeignKey(
+        "User.id", ondelete="CASCADE"), nullable=False, primary_key=True)
+    date = db.Column(db.String(256), nullable=False)
+    pending = db.Column(db.Boolean, nullable=False)
 
 
 def hash_password(pwd):
@@ -119,7 +122,7 @@ def generate_bleat(n=1000):
             like = random.randint(0, 100)
             retweet = random.randint(0, 10)
             reply = 0  # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
-            date = datetime.datetime.now()
+            date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             new_bleat = Bleat(title=title, content=content, author_id=author_id,
                               like=like, retweet=retweet, reply=reply, date=date)
             db.session.add(new_bleat)
@@ -134,7 +137,7 @@ def generate_relationship(n=200):
         if not db.session.query(Relationship).filter(and_(Relationship.userID1 == id1, Relationship.userID2 == id2)).first():
             if id1 != id2 and User.query.filter_by(id=id1).first() and User.query.filter_by(id=id2).first():
                 p = bool(random.randint(0, 1))
-                date = datetime.datetime.now()
+                date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if p is True:
 
                     db.session.add(Relationship(
@@ -147,7 +150,11 @@ def generate_relationship(n=200):
                 db.session.commit()
     return "success"
 
+
 if __name__ == "__main__":
-    # print(generate_users())
-    # print(generate_bleat())
-    # print(generate_relationship())
+    with app.app_context():
+        db.create_all()
+
+    print(generate_users())
+    print(generate_bleat())
+    print(generate_relationship())
