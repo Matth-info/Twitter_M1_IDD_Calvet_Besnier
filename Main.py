@@ -82,6 +82,7 @@ class Relationship(db.Model):
 @app.route("/")  # testing root
 def home():
     current_user = User.query.filter_by(id=session.get("current_user")).first()
+
     if current_user:
         return render_template("Bleatter.html", name=current_user.username)
     else:
@@ -283,7 +284,7 @@ def post_a_bleat():
                     return redirect(url_for("post_a_bleat"))
                 else:
                     new_bleat = Bleat(title=title, content=content, author_id=int(
-                        id_user), like=0, retweet=0, reply=0, date=datetime.datetime.now())
+                        id_user), like=0, retweet=0, reply=0, date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
                     db.session.add(new_bleat)
                     db.session.commit()
@@ -309,26 +310,36 @@ def home_user():
 
         # Recup friend's id list
         relation = Relationship.query.all()
-        friend_id = []
+        friends_id = []  # the ongoing friend id are store in this array
 
         user_id = session.get('current_user')
 
         for ele in relation:
             if ele.userID1 == user_id and ele.pending:
-                friend_id.append(ele.userID2)
+                friends_id.append(ele.userID2)
+
+        users = User.query.all()
+        friends_name = dict()
+        while len(list(friends_name.keys())) != len(friends_id):
+            for e in users:
+                if e.id in friends_id:
+                    friends_name[e.id] = e.username
+        # friends_name dictionary with (user.id) : user.username
 
         # Recup friend's bleat
         bleats = Bleat.query.all()
-        friend_bleats = []
+        friends_bleats = []
 
         for ele in bleats:
-            if ele.author_id in friend_id:
-                friend_bleats.append(ele)
+            if ele.author_id in friends_id:
+                friends_bleats.append((friends_name[ele.author_id], ele))
 
         # Sort it from youngest to oldest
-        sorted(friend_bleats, key=lambda friend_bleats: friend_bleats.date)
-        friend_bleats.reverse()
+        sorted(friends_bleats,
+               key=lambda friends_bleats: friends_bleats[1].date)
+        friends_bleats.reverse()
 
+        """
         message = []
         name = []
         date = []
@@ -342,9 +353,10 @@ def home_user():
             date.append(t.date[0:10] + " at  " + t.date[11:19])
             like.append(t.like)
             rebleat.append(t.retweet)
-            reply.append(t.reply)
+            reply.append(t.reply)"""
 
-        return render_template("home_page.html", len=len(message), message=message, name=name, date=date, like=like, rebleat=rebleat, reply=reply)
+        return render_template("home_page.html", messages=friends_bleats)
+        # return render_template("home_page.html", len=len(message), message=message, name=name, date=date, like=like, rebleat=rebleat, reply=reply)
 
     if request.method == "POST":  # Method = POST
 
