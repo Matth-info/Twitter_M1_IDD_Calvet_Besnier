@@ -16,6 +16,7 @@ import datetime
 import hashlib
 from data_struct import *
 import networkx as nx
+import random
 
 # app
 app = Flask(__name__)
@@ -444,26 +445,48 @@ def show_friends():
 
     name = U[user_id]["username"]
 
-    friends = dict()  # hashmap storing the relationship (id_user) = (accept,not_accept) where accept and not_accept are linkedlist of id
-    G = nx.DiGraph()
+    G_p = nx.DiGraph()
+    G_np = nx.DiGraph()
+
     for r in relationships:
-        if r.userID1 not in friends.keys():
-            friends[r.userID1] = set()
-        G.add_edge(r.userID1, r.userID2, weight=r.pending)
-        friends[r.userID1].add((r.userID2, r.pending))
+        if r.pending == True:
+            G_p.add_edge(r.userID1, r.userID2)
+        else:
+            G_np.add_edge(r.userID1, r.userID2)
 
-    labels = nx.get_edge_attributes(G, 'weight')
-    pos = nx.spring_layout(G)
-    nx.draw_networkx_nodes(G, pos, node_size=100)
-    nx.draw_network_labels(G, pos)
-    nx.draw_networkx_edges(G, pos, edge_color='r', arrows=True)
-    plt.savefig("static/graph.png", format="PNG")
-    plt.clf()
+    F, I, W = [], dict(), dict()
 
-    return render_template("test_bootstrap.html")
+    if user_id in G_p:
+        for f in G_p.successors(user_id):  # friends of current user
+            F.append(U[f])
+    if user_id in G_np:
+        for i in G_np.successors(user_id):  # current user invite these user
+            I[i] = U[i]
+        # want to be friend with current user
+        for w in G_np.predecessors(user_id):
+            W[w] = U[w]
+
+    FF = dict()
+    # BFS from the user_id node to the leaf of a bfs tree of depth 2
+    if user_id in G_p:
+        T = nx.descendants_at_distance(G_p, user_id, distance=2)
+    else:
+        T = list(G_p.nodes)
+        T_temp = []
+        randomlist = random.sample(range(0, len(T)), 10)
+        for i in randomlist:
+            T_temp.append(T[i])
+        T = T_temp
+        # random friend suggestion
+
+    for ff in T:
+        if not (ff == user_id or ff in I.keys() or ff in W.keys() or ff in FF.keys()):
+            FF[ff] = U[ff]
+
+    return render_template("friends.html", name=name, F=F, I=list(I.values()), W=list(W.values()), FF=list(FF.values()))
 
 
-@app.route("/bleats/<word>", methods=["GET"])
+@ app.route("/bleats/<word>", methods=["GET"])
 def find_bleat_word(word):
     # get the bleat
     users = User.query.all()
@@ -507,7 +530,7 @@ def find_bleat_word(word):
     return render_template("show_bleats.html", b_list=b_list)
 
 
-@app.route("/user/friends/<int:id>", methods=["GET", "POST"])
+@ app.route("/user/friends/<int:id>", methods=["GET", "POST"])
 def accept_friends(id):
     if request.method == "GET":
         redirect(url_for("show_friends"))
@@ -531,7 +554,7 @@ def accept_friends(id):
                 return redirect(url_for("show_friends"))
 
 
-@app.route("/user/friend_request/<int:id>", methods=["GET", "POST"])
+@ app.route("/user/friend_request/<int:id>", methods=["GET", "POST"])
 def friend_request(id):
     if request.method == "GET":
         return redirect(url_for("show_friends"))
@@ -552,7 +575,7 @@ def friend_request(id):
                 return redirect(url_for("show_friends"))
 
 
-@app.route("/user/remove_friend/<int:ID>", methods=["POST"])
+@ app.route("/user/remove_friend/<int:ID>", methods=["POST"])
 def remove_friend(ID):
     if request.method == "POST":
         user_id = session.get("current_user")
@@ -572,7 +595,7 @@ def remove_friend(ID):
             return redirect(url_for("show_friends"))
 
 
-@app.route("/my_profile", methods=["GET"])
+@ app.route("/my_profile", methods=["GET"])
 def profile():
     if request.method == "GET":
         cur_id = session.get("current_user")
