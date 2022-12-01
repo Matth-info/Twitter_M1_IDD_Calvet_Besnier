@@ -8,4 +8,5 @@ function sleep(milliseconds) {
 
 function goat(){
     document.getElementById('son1').play();
+    sleep(3000)
 }
