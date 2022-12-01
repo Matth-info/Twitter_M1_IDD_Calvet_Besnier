@@ -15,9 +15,11 @@ from sqlalchemy.engine import Engine
 import datetime
 import hashlib
 from data_struct import *
-
+import networkx as nx
+import matplotlib.pyplot as plt
 from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
-import tweepy
+
+
 # app
 app = Flask(__name__)
 app.secret_key = "012345"
@@ -151,6 +153,39 @@ def generate_relationship(n=200):
     return "success"
 
 
+def show_friends():
+
+    users = User.query.all()  # load the users in the memory
+    # load all the relationship data in the memory
+    relationships = Relationship.query.all()
+    # implement a hash function with direct chaining to store the relation ship
+
+    # hash map storing all users accessible by their id
+    U = dict()
+    for u in users:
+        U[u.id] = {"id": u.id,
+                   "username": u.username,
+                   "email": u.email,
+                   "location": u.location}
+
+    G_p = nx.DiGraph()
+    G_np = nx.DiGraph()
+
+    for r in relationships:
+        if r.pending == True:
+            G_p.add_edge(r.userID1, r.userID2)
+        else:
+            G_np.add_edge(r.userID1, r.userID2)
+
+    # pos = nx.spring_layout(G,seed=63)
+    # nx.draw(G, pos=nx.random_layout(G, seed=64), arrows=True, with_labels=True)
+    # nx.draw_networkx_edge_labels(
+        # G, pos = nx.random_layout(G, seed=64), edge_labels = edge_lab)
+    # plt.savefig("static/graph.png", format="PNG")
+
+    return G_p, G_np
+
+
 if __name__ == "__main__":
 
     with app.app_context():
@@ -159,3 +194,8 @@ if __name__ == "__main__":
     # print(generate_users())
     # print(generate_bleat())
     # print(generate_relationship())
+    G_p, G_np = show_friends()
+    nx.draw(G_p, pos=nx.random_layout(G_p, seed=64), with_labels=True)
+    plt.show()
+    nx.draw(G_np, pos=nx.random_layout(G_np, seed=64), with_labels=True)
+    plt.show()
