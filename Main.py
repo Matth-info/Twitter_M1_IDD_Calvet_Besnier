@@ -615,7 +615,7 @@ def profile():
         for b in bleats:
             messages.insert_at_end(b)
 
-        return render_template("profile.html", email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list())
+        return render_template("profile.html", email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list()[::-1])
 
 
 @app.route("/profile/<int:ID>", methods=["GET"])
