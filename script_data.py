@@ -152,9 +152,10 @@ def generate_relationship(n=200):
 
 
 if __name__ == "__main__":
+
     with app.app_context():
         db.create_all()
 
-    print(generate_users())
-    print(generate_bleat())
-    print(generate_relationship())
+    # print(generate_users())
+    # print(generate_bleat())
+    # print(generate_relationship())

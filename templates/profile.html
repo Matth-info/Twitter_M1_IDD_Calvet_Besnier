@@ -3,9 +3,13 @@
 {% block title %}<title>Profile</title>{% endblock %}
 {% block main %}
 
-<h1>{{username}}'s Profile</h1>
+<h1 class="text-center">{{username}}'s Profile</h1>
 <div class="container">
-    <div class="row g-2">
+    <figure class="text-center">
+        <img src="{{url_for('static', filename='goat2.jpeg')}}" class="figure-img img-fluid img-thumbnail" alt="A goat"
+            height="250px" width="250px">
+    </figure>
+    <div class="row g-2 justify-content-md-center">
         <div class="p-3 border bg-light">
             <div class="col">
                 <img src="{{url_for('static', filename='icon_profile.png')}}" height="20px" width="20px">{{nb_friends}}
@@ -26,11 +30,13 @@
         </div>
 
     </div>
+    {% if my_account %}
     <div class="text-right">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#delete_profile">
             Delete account
         </button>
     </div>
+    {% endif %}
 
     {%include 'flash.html' %}
     <ul class="list-group">
@@ -39,11 +45,13 @@
             <p><b>{{b.title}}</b></p>
             <p class="mb-1">{{b.content}}</p>
             <small>posted at {{b.date}}</small>
+            {% if my_account %}
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{b['id']}}">
                     Delete
                 </button>
             </div>
+            {% endif %}
 
             <!-- Modal -->
             <div class="modal" id="{{b['id']}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"

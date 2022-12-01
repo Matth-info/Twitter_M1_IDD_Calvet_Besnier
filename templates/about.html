@@ -4,4 +4,24 @@
 <h1> About </h1>
 <p>Bleatter is a social network to Hugo Calvet and Matthias Besnier are the Bleatter founders.
 </p>
+<div class="row">
+    <div class="col">
+
+        <figure class="figure">
+
+            <img src="{{url_for('static', filename='goat2.jpeg')}}" class="figure-img img-fluid rounded-circle"
+                alt="A goat">
+
+            <figcaption class="figure-caption">Hugo Calvet</figcaption>
+        </figure>
+
+    </div>
+    <div class="col">
+        <figure class="figure">
+            <img src="{{url_for('static', filename='goat1.jpeg')}}" class="figure-img img-fluid rounded-circle"
+                alt="A goat">
+            <figcaption class="figure-caption">Matthias Besnier</figcaption>
+        </figure>
+    </div>
+</div>
 {% endblock %}
