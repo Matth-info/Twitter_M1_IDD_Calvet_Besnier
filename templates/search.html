@@ -4,19 +4,48 @@
 
 {% block main %}
 
-    <h3>Users :</h3>
-    {%for ele in user_found.keys() %}
-        <a href={{user_found[ele]}}>{{ele["username"]}} </a>
+{% if user_bool %}
+<h3>Users</h3>
+{%for ele in user_found.keys() %}
+<ul class="list-group">
+    <li class="list-group-item list-group-item-action flex-column align-items-start mt-3 shadow p-3 ">
+        <a href={{user_found[ele]}}>{{ele["username"]}}</a>
         <p>{{ele["email"]}}</p>
-    {%endfor%}
+    </li>
+</ul>
+{%endfor%}
+{%endif %}
 
-    <h3>Bleats :</h3>
-    {%for ele in b_list %}
+{% if b_list|length %}
+<h3>Bleats containing the word "{{word}}"</h3>
+{%for ele in b_list %}
+<ul class="list-group">
+    <li class="list-group-item list-group-item-action flex-column align-items-start mt-3 shadow p-3 ">
         <p><strong>{{user_index[ele.author_id].username}}</strong></p>
-        <p> {{ele["title"]}} :</p>
-        <p> {{ele["content"]}} </p>
-        <p> {{ele["date"]}} </p>
-        <hr>
-    {%endfor%}
+        <p>{{user_index[ele.author_id].email}}</p>
+        <p>Title : {{ele["title"]}} </p>
+        <p class="mb-1">{{ele["content"]}}</p>
+        <small>{{ele["date"]}}</small>
+        <div class="row g-2">
+            <div class="p-1">
+                <div class="col">
+                    <img src="{{url_for('static', filename='like.png')}}" height="20px" width="20px"> {{ele.like}}
+                </div>
+            </div>
+            <div class="p-1">
+                <div class="col">
+                    <img src="{{url_for('static', filename='rebleat.png')}}" height="20px" width="20px">
+                    {{ele.retweet}}
+                </div>
+            </div>
+            <div class="p-1">
+                <div class="col">
+                    <img src="{{url_for('static', filename='reply.png')}}" height="20px" width="20px"> {{ele.reply}}
+                </div>
+            </div>
+    </li>
+</ul>
+{%endfor%}
+{% endif %}
 
 {% endblock %}
