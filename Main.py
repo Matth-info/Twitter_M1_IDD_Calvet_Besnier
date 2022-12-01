@@ -1,3 +1,5 @@
+import os
+import matplotlib.pyplot as plt
 from sqlalchemy import update
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -5,7 +7,7 @@ import scipy as sp
 from data_struct import LinkedList
 from sqlite3 import Connection as SQLite3Connection
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
-                   url_for, g, session)
+                   url_for, g, session, send_file)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import PrimaryKeyConstraint, CheckConstraint, UniqueConstraint
 from sqlalchemy import event
@@ -13,7 +15,7 @@ from sqlalchemy.engine import Engine
 import datetime
 import hashlib
 from data_struct import *
-
+import networkx as nx
 
 # app
 app = Flask(__name__)
@@ -338,29 +340,12 @@ def home_user():
         sorted(friends_bleats,
                key=lambda friends_bleats: friends_bleats[1].date)
         friends_bleats.reverse()
-
-        """
-        message = []
-        name = []
-        date = []
-        like = []
-        rebleat = []
-        reply = []
-
-        for t in friend_bleats:
-            name.append(User.query.filter_by(id=t.author_id).first().username)
-            message.append(t.title + " : " + t.content)
-            date.append(t.date[0:10] + " at  " + t.date[11:19])
-            like.append(t.like)
-            rebleat.append(t.retweet)
-            reply.append(t.reply)"""
-
         return render_template("home_page.html", messages=friends_bleats)
-        # return render_template("home_page.html", len=len(message), message=message, name=name, date=date, like=like, rebleat=rebleat, reply=reply)
 
-    if request.method == "POST":  # Method = POST
+    if request.method == "POST":
 
-        word = request.form["search"]  # get the data from the form name search
+        # get the data from the form name "search"
+        word = request.form["search"]
         user_index = {}
 
         # First find all profile with username same as searched word
@@ -372,6 +357,10 @@ def home_user():
             if ele.username.lower() == word.lower():  # Search if word user exist
                 path = '/profile/' + str(ele.id)
                 user_found[ele] = path
+
+        user_bool = False
+        if len(user_found.keys()) > 0:
+            user_bool = True
 
         # Now find all bleat with the searched word inside
         d_search = dict()
@@ -386,14 +375,15 @@ def home_user():
                 else:
                     d_search[w].insert_at_end(bleat)
 
-        # Recup in O(1) all bleat
+        # get it in O(1) all bleat
         if d_search.get(word):
             # transform our linkedList to list
             bleat_found = d_search[word].to_list()
+            w = word
         else:
             bleat_found = []
 
-        return render_template("search.html", user_found=user_found, b_list=bleat_found, user_index=user_index)
+        return render_template("search.html", user_bool=user_bool, word=w, user_found=user_found, b_list=bleat_found, user_index=user_index)
 
 
 """function to get the friends of a given user"""
@@ -440,7 +430,8 @@ def show_friends():
     if user_id is None:
         return render_template("signin.html")
     users = User.query.all()  # load the users in the memory
-    friends = Relationship.query.all()  # load all the relationship data in the memory
+    # load all the relationship data in the memory
+    relationships = Relationship.query.all()
     # implement a hash function with direct chaining to store the relation ship
 
     # hash map storing all users accessible by their id
@@ -452,51 +443,24 @@ def show_friends():
                    "location": u.location}
 
     name = U[user_id]["username"]
-    if len(friends) == 0:
-        return render_template("friends.html", name=name)
-    coord_1 = np.array([])
-    coord_2 = np.array([])
-    data = np.array([], dtype=np.int8)
-    for rel in friends:
-        coord_1 = np.append(coord_1, int(rel.userID1))
-        coord_2 = np.append(coord_2, int(rel.userID2))
-        if rel.pending == False:
-            data = np.append(data, 1)
-        else:
-            data = np.append(data, 2)
-    # create a sparse matrix that stores the relationships
-    Rel_sparse_mat = sp.sparse.coo_matrix(
-        (data, (coord_1, coord_2)), shape=(len(U), len(U)))
-    # add missing zeros
-    r = Rel_sparse_mat.todense()
 
-    # the row represents friends of the current user
-    friends_of_user = r[user_id]
-    # the column represents who is friends or want to be friend with the current user
-    future_friends_of_user = r[:, user_id].T
+    friends = dict()  # hashmap storing the relationship (id_user) = (accept,not_accept) where accept and not_accept are linkedlist of id
+    G = nx.DiGraph()
+    for r in relationships:
+        if r.userID1 not in friends.keys():
+            friends[r.userID1] = set()
+        G.add_edge(r.userID1, r.userID2, weight=r.pending)
+        friends[r.userID1].add((r.userID2, r.pending))
 
-    F, I, W = [], dict(), dict()
-    # using dictionary help to avoid dealing with dublicates
-    for i in range(len(U)):
+    labels = nx.get_edge_attributes(G, 'weight')
+    pos = nx.spring_layout(G)
+    nx.draw_networkx_nodes(G, pos, node_size=100)
+    nx.draw_network_labels(G, pos)
+    nx.draw_networkx_edges(G, pos, edge_color='r', arrows=True)
+    plt.savefig("static/graph.png", format="PNG")
+    plt.clf()
 
-        if friends_of_user[0, i] == 2:  # friends
-            F.append(U[i])
-        if friends_of_user[0, i] == 1:  # current user invite him
-            I[U[i]["id"]] = U[i]
-        # want to be friend with current user
-        if future_friends_of_user[0, i] == 1:
-            W[U[i]["id"]] = U[i]
-
-    # using a dictionary (duplicate are not allowed) to avoid putting 2 times the friend of friend of the current user
-    # set are not usable here because it needs unmutable object which is not the case for a dictionary
-
-    FF = dict()
-    for f in F:
-        for ff in friends_of(f["id"]):  # list of dictionaries
-            if not (ff["id"] == user_id or ff["id"] in FF.keys() or ff["id"] in I.keys() or ff["id"] in W.keys()):
-                FF[ff["id"]] = ff
-
-    return render_template("friends.html", name=name, F=F, I=list(I.values()), W=list(W.values()), FF=list(FF.values()))
+    return render_template("test_bootstrap.html")
 
 
 @app.route("/bleats/<word>", methods=["GET"])
@@ -627,7 +591,7 @@ def profile():
         for b in bleats:
             messages.insert_at_end(b)
 
-        return render_template("profile.html", email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list())
+        return render_template("profile.html", my_account=True, email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list())
 
 
 @app.route("/profile/<int:ID>", methods=["GET"])
@@ -636,8 +600,12 @@ def profile_user(ID):
         users = User.query.all()
 
         user_searched = User.query.filter_by(id=ID).first()
-        # user_searched = session["user_index"].get(ID)
+
+        nb_friends = Relationship.query.filter(
+            (Relationship.userID1 == ID) & (Relationship.pending == True)).count()
+
         username = user_searched.username
+        email = user_searched.email
         location = user_searched.location
         bleats = user_searched.bleats
 
@@ -646,7 +614,7 @@ def profile_user(ID):
         for t in bleats:
             messages.insert_at_end(t)
 
-        return render_template("profile.html", len=len(messages.to_list()), username=username, location=location, message=messages.to_list())
+        return render_template("profile.html", my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list())
 
 
 @app.route("/user/remove_bleat/<int:ID>", methods=["POST"])
