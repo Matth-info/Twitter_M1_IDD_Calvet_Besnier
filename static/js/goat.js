@@ -1,12 +1,14 @@
 function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-      currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
-  }
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
 
-function goat(){
-    document.getElementById('son1').play();
-    sleep(3000)
+function goat() {
+  var myAudio = new Audio("son.wav")
+  sleep(3000)
+  myAudio.play()
+
 }
