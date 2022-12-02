@@ -396,6 +396,7 @@ def home_user():
 
         return render_template("home_page.html", messages=friends_bleats, like_index=like_index,
                                 rb_index=rb_index,
+                                most_used_word = most_used_word,
                                 current_user=session.get("current_user"))
 
     if request.method == "POST":
