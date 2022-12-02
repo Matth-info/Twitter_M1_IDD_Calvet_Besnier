@@ -81,6 +81,15 @@ class Relationship(db.Model):
     date = db.Column(db.String(256), nullable=False)
     pending = db.Column(db.Boolean, nullable=False)
 
+class Like(db.Model):
+    __tablename__ = "Like"
+    bleat_id = db.Column(db.Integer, db.ForeignKey(Bleat.id), primary_key=True) #Bleat liked
+    liker_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True) #User who liked
+
+class Rebleat(db.Model):
+    __tablename__ = "Rebleat"
+    bleat_id = db.Column(db.Integer, db.ForeignKey(Bleat.id), primary_key=True) #Bleat rebleat
+    rebleater_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True) #User who rebleated
 
 @app.route("/")  # testing root
 def home():
@@ -341,7 +350,30 @@ def home_user():
         sorted(friends_bleats,
                key=lambda friends_bleats: friends_bleats[1].date)
         friends_bleats.reverse()
-        return render_template("home_page.html", messages=friends_bleats)
+
+        #Like_index Creation
+        like_bd = Like.query.all()
+        like_index = dict()
+
+        for l in like_bd: #For each bleat wwe have all the user who liked it
+            if like_index.get(l.bleat_id):
+                like_index[l.bleat_id].append(l.liker_id)
+            else:
+                like_index[l.bleat_id] = [l.liker_id]
+
+        #Rebleat_index Creation
+        rb_bd = Rebleat.query.all()
+        rb_index = dict()
+
+        for r in rb_bd:
+            if rb_index.get(r.bleat_id):
+                rb_index[r.bleat_id].append(r.rebleater_id)
+            else:
+                rb_index[r.bleat_id] = [r.rebleater_id]
+
+        return render_template("home_page.html", messages=friends_bleats, like_index=like_index,
+                                rb_index=rb_index,
+                                current_user=session.get("current_user"))
 
     if request.method == "POST":
 
@@ -595,7 +627,7 @@ def remove_friend(ID):
             return redirect(url_for("show_friends"))
 
 
-@ app.route("/my_profile", methods=["GET"])
+@app.route("/my_profile", methods=["GET"])
 def profile():
     if request.method == "GET":
         cur_id = session.get("current_user")
@@ -636,6 +668,7 @@ def profile_user(ID):
 
         for t in bleats:
             messages.insert_at_end(t)
+        #Faut rajouter les rebleats
 
         return render_template("profile.html", my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list())
 
@@ -671,6 +704,74 @@ def delete_user():
 
         return redirect(url_for("logout"))
 
+@app.route("/zone_test", methods=["GET"]) #Comme son nom l'indique c'est la zone de test
+def test():
+    return render_template("test_bootstrap.html")
+
+@app.route("/like/<bleat_id>", methods=["POST", "DELETE"])
+def like(bleat_id):
+    if request.method == "POST":
+
+        #Create the new like
+        new_like = Like()
+        new_like.bleat_id = bleat_id
+        new_like.liker_id = session.get("current_user")
+
+        #Add +1 to bleat.like
+        bleat = db.session.query(Bleat).filter(Bleat.id == bleat_id).first()
+        bleat.like +=1
+
+        #Add the new like
+        db.session.add(new_like)
+        db.session.commit()
+        return {}
+
+    if request.method == "DELETE":
+        
+        #Recup like to delete
+        like_toDelete = db.session.query(Like).filter(Like.bleat_id == bleat_id and Like.liker_id == session.get("current_user")).first()
+        
+        #Add -1 to bleat.like
+        bleat = db.session.query(Bleat).filter(Bleat.id == bleat_id).first()
+        bleat.like = bleat.like - 1
+
+        #Delete it
+        db.session.delete(like_toDelete)
+        db.session.commit()
+        return {}
+
+
+@app.route("/rebleat/<bleat_id>", methods=["POST", "DELETE"])
+def rebleat(bleat_id):
+    if request.method == "POST":
+
+        #Create the new rebleat
+        new_rebleat = Rebleat()
+        new_rebleat.bleat_id = bleat_id
+        new_rebleat.rebleater_id = session.get("current_user")
+
+        #Add +1 to bleat.retweet
+        bleat = db.session.query(Bleat).filter(Bleat.id == bleat_id).first()
+        bleat.retweet +=1
+
+        #Add the new rebleat
+        db.session.add(new_rebleat)
+        db.session.commit()
+        return {}
+
+    if request.method == "DELETE":
+        
+        #Recup like to delete
+        rebleat_toDelete = db.session.query(Rebleat).filter(Rebleat.bleat_id == bleat_id and Rebleat.rebleater_id == session.get("current_user")).first()
+        
+        #Add -1 to bleat.like
+        bleat = db.session.query(Bleat).filter(Bleat.id == bleat_id).first()
+        bleat.retweet = bleat.retweet - 1
+
+        #Delete it
+        db.session.delete(rebleat_toDelete)
+        db.session.commit()
+        return {}
 
 if __name__ == "__main__":
 
