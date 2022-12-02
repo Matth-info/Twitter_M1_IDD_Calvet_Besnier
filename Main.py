@@ -17,7 +17,7 @@ import hashlib
 from data_struct import *
 import networkx as nx
 import random
-
+from collections import Counter
 # app
 app = Flask(__name__)
 app.secret_key = "012345"
@@ -308,6 +308,29 @@ def about():
 
 @app.route("/home_page", methods=["GET", "POST"])
 def home_user():
+    g.search = "home_page"
+    word_counter = Counter()
+    bleats = Bleat.query.all()
+    # Now find all bleat with the searched word inside
+    d_search = dict()
+    # Create the dict {word: linkedlist of all bleats containing word]}
+    for bleat in bleats:
+        for w in bleat.title.split():
+            word_counter[w] += 1
+            if not d_search.get(w):
+                d_search[w] = LinkedList()  # Access O(n) Insertion O(1)
+                d_search[w].insert_at_end(bleat)
+            else:
+                d_search[w].insert_at_end(bleat)
+
+        for w in bleat.content.split():
+            word_counter[w] += 1
+            if not d_search.get(w):
+                d_search[w] = LinkedList()
+                d_search[w].insert_at_end(bleat)
+            else:
+                d_search[w].insert_at_end(bleat)
+    most_used_word = [u[0] for u in word_counter.most_common(20)]
 
     if request.method == "GET":
 
@@ -330,7 +353,7 @@ def home_user():
         # friends_name dictionary with (user.id) : user.username
 
         # Recup friend's bleat
-        bleats = Bleat.query.all()
+
         friends_bleats = []
 
         for ele in bleats:
@@ -341,14 +364,13 @@ def home_user():
         sorted(friends_bleats,
                key=lambda friends_bleats: friends_bleats[1].date)
         friends_bleats.reverse()
-        return render_template("home_page.html", messages=friends_bleats)
+        return render_template("home_page.html", messages=friends_bleats, most_used_word=most_used_word)
 
     if request.method == "POST":
 
         # get the data from the form name "search"
         word = request.form["search"]
         user_index = {}
-
         # First find all profile with username same as searched word
         users = User.query.all()
         user_found = {}
@@ -356,25 +378,11 @@ def home_user():
             user_index[ele.id] = ele  # Create user_index
 
             if ele.username.lower() == word.lower():  # Search if word user exist
-                path = '/profile/' + str(ele.id)
-                user_found[ele] = path
+                user_found[ele] = str(ele.id)
 
         user_bool = False
         if len(user_found.keys()) > 0:
             user_bool = True
-
-        # Now find all bleat with the searched word inside
-        d_search = dict()
-        bleats = Bleat.query.all()
-
-        # Create the dict {word: linkedlist of all bleats containing word]}
-        for bleat in bleats:
-            for w in bleat.content.split():
-                if not d_search.get(w):
-                    d_search[w] = LinkedList()
-                    d_search[w].insert_at_end(bleat)
-                else:
-                    d_search[w].insert_at_end(bleat)
 
         # get it in O(1) all bleat
         if d_search.get(word):
@@ -384,7 +392,7 @@ def home_user():
         else:
             bleat_found = []
 
-        return render_template("search.html", user_bool=user_bool, word=w, user_found=user_found, b_list=bleat_found, user_index=user_index)
+        return render_template("search.html", most_used_word=most_used_word, user_bool=user_bool, word_s=w, user_found=user_found, b_list=bleat_found, user_index=user_index)
 
 
 """function to get the friends of a given user"""
@@ -428,6 +436,7 @@ to gain storage space and computing time"""
 @app.route("/user/friends", methods=["GET"])
 def show_friends():
     user_id = session.get('current_user')
+    g.search = False
     if user_id is None:
         return render_template("signin.html")
     users = User.query.all()  # load the users in the memory
@@ -595,8 +604,9 @@ def remove_friend(ID):
             return redirect(url_for("show_friends"))
 
 
-@ app.route("/my_profile", methods=["GET"])
+@ app.route("/my_profile", methods=["GET", "POST"])
 def profile():
+    g.search = "profile"
     if request.method == "GET":
         cur_id = session.get("current_user")
         users = User.query.all()
@@ -614,7 +624,67 @@ def profile():
         for b in bleats:
             messages.insert_at_end(b)
 
-        return render_template("profile.html",my_account=True, email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list()[::-1])
+        return render_template("profile.html", my_account=True, email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list()[::-1])
+
+    if request.method == "POST":
+        # search function only for your own bleats or your friends
+        # get the data from the form name "search"
+        word = request.form["search"]
+        cur_id = session.get("current_user")
+        friend_index = dict()
+        relationship__current_user = Relationship.query.filter(
+            (Relationship.userID1 == cur_id) & (Relationship.pending == True))
+
+        # First find all profile with username same as searched word
+        users = User.query.all()
+        user_found = {}
+        users_dict = dict()
+        for u in users:
+            users_dict[u.id] = u
+
+        for ele in relationship__current_user:
+            friend_index[ele.userID2] = users_dict[ele.userID2]
+            if users_dict[ele.userID2].username.lower() == word.lower():
+                path = "/profile" + str(ele.id)
+                user_found[ele] = path
+
+        user_bool = False
+        if len(user_found.keys()) > 0:
+            user_bool = True
+
+        # Now find all bleat with the searched word inside
+        d_search = dict()
+        bleats = Bleat.query.all()
+
+        # Create the dict {word: linkedlist of all bleats containing word]}
+        for bleat in bleats:
+            if bleat.author_id in friend_index.keys():
+                # take the title into account
+                for w in bleat.title.split():
+                    if not d_search.get(w):
+                        d_search[w] = LinkedList()
+                        d_search[w].insert_at_end(bleat)
+                    else:
+                        d_search[w].insert_at_end(bleat)
+
+                # take the content into account
+                for w in bleat.content.split():
+
+                    if not d_search.get(w):
+                        d_search[w] = LinkedList()
+                        d_search[w].insert_at_end(bleat)
+                    else:
+                        d_search[w].insert_at_end(bleat)
+
+        # get it in O(1) all bleat
+        if d_search.get(word):
+            # transform our linkedList to list
+            bleat_found = d_search[word].to_list()
+            w = word
+        else:
+            bleat_found = []
+
+        return render_template("search.html", user_bool=user_bool, word=w, user_found=user_found, b_list=bleat_found, user_index=friend_index)
 
 
 @app.route("/profile/<int:ID>", methods=["GET"])
