@@ -15,17 +15,69 @@
             <p class="mb-1">{{b.content}}</p>
             <small>{{b.date}}</small>
             <div class="row g-2">
+                <!--LIKE-->
                 <div class="p-1">
                     <div class="col">
-                        <img src="{{url_for('static', filename='like.png')}}" height="20px" width="20px"> {{b.like}}
+                        {%if (current_user not in like_index[b.id]) %}
+                        <form>
+                            <input class="like" onclick="updateLike_btn(this, '{{b.id}}')" type="button" name="Like" style="background-image: url('/static/like.png');
+                                                                    background-color: white;
+                                                                    background-repeat: no-repeat;
+                                                                    background-size: 2em;
+                                                                    border: none;
+                                                                    width: 2.3em;
+                                                                    height: 2.3em;
+                                                                    ">
+                        </form>
+                        {% else %}
+                        <form>
+                            <input class="like" onclick="updateLike_btn(this, '{{b.id}}')" type="button" name="Unlike" style="background-image: url('/static/red_like.png');
+                                                                    background-color: white;
+                                                                    background-repeat: no-repeat;
+                                                                    background-size: 2em;
+                                                                    border: none;
+                                                                    width: 2.3em;
+                                                                    height: 2.3em;
+                                                                    ">
+                        </form>
+                        {% endif %}
+                        
+                        {{b.like}}
                     </div>
                 </div>
+
+                <!--REBLEAT-->
                 <div class="p-1">
                     <div class="col">
-                        <img src="{{url_for('static', filename='rebleat.png')}}" height="20px" width="20px">
+                        {%if (current_user not in rb_index[b.id]) %}
+                        <form>
+                            <input class="rebleat" onclick="updateRB_btn(this, '{{b.id}}')" type="button" name="Rebleat" style="background-image: url('/static/rebleat.png');
+                                                                    background-color: white;
+                                                                    background-repeat: no-repeat;
+                                                                    background-size: 2em;
+                                                                    border: none;
+                                                                    width: 2.3em;
+                                                                    height: 2.3em;
+                                                                    ">
+                        </form>  
+                        {% else %}
+                        <form>
+                            <input class="rebleat" onclick="updateRB_btn(this, '{{b.id}}')" type="button" name="Unrebleat" style="background-image: url('/static/black_rebleat.png');
+                                                                    background-color: white;
+                                                                    background-repeat: no-repeat;
+                                                                    background-size: 2em;
+                                                                    border: none;
+                                                                    width: 2.3em;
+                                                                    height: 2.3em;
+                                                                    ">
+                        </form>
+                        {% endif %}
+                        
                         {{b.retweet}}
                     </div>
                 </div>
+
+                <!--REPLAY-->
                 <div class="p-1">
                     <div class="col">
                         <img src="{{url_for('static', filename='reply.png')}}" height="20px" width="20px"> {{b.reply}}
@@ -35,4 +87,32 @@
         {%endfor%}
     </ul>
 </div>
+
+<script>
+    function updateLike_btn(ele, id_bleat){
+        if(ele.name === 'Like'){
+            ele.name = 'Unlike';
+            ele.style.backgroundImage = "url('/static/red_like.png')"
+            fetch("/like/"+id_bleat, {"method":"POST"})
+        } else {
+            ele.name = 'Like'
+            ele.style.backgroundImage = "url('/static/like.png')"
+            fetch("/like/"+id_bleat, {"method":"DELETE"})
+        }
+    }
+
+    function updateRB_btn(ele, id_bleat){
+        if(ele.name === 'Rebleat'){
+            ele.name = 'Unrebleat';
+            ele.style.backgroundImage = "url('/static/black_rebleat.png')"
+            fetch("/rebleat/"+id_bleat, {"method":"POST"})
+        } else {
+            ele.name = 'Rebleat'
+            ele.style.backgroundImage = "url('/static/rebleat.png')"
+            fetch("/rebleat/"+id_bleat, {"method":"DELETE"})
+        }
+    }
+
+</script>
+
 {% endblock %}
