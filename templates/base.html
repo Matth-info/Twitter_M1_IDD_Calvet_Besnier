@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <!--<link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">-->
-
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -27,9 +26,9 @@
         <div class="container-fluid">
             <ul class="navbar-nav mr-3">
                 <li class="nav-item">
-                    <a class="navbar-brand" href="/">
-                        <img src="{{url_for('static', filename='logo1.png')}}" class="d-inline-block align-center"
-                            width="40" height="40" alt="" />
+                    <a class="navbar-brand" href="/" onclick="goat()">
+                        <img src="{{url_for('static', filename='logo1.png')}}" onclick="goat()"
+                            class="d-inline-block align-center" width="40" height="40" alt="" />
                         <b>BLEATTER</b>
                     </a>
                 </li>
@@ -93,11 +92,20 @@
                 </li>
 
             </ul>
+            {% if g['search'] == "profile" %}
             <form class="form-inline" method="post">
-                <input class="form-control mr-sm-2 " type="search" name="search" placeholder="Search"
+                <input class="form-control mr-sm-2 " type="search" name="search" placeholder="Search friends or bleats"
                     aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search </button>
             </form>
+            {%endif%}
+            {% if g['search'] == "home_page" %}
+            <form class="form-inline" method="post">
+                <input class="form-control mr-sm-2 " type="search" name="search" placeholder="Search users or bleats"
+                    aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search </button>
+            </form>
+            {%endif%}
         </div>
     </nav>
 
