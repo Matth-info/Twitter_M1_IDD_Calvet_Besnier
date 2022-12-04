@@ -42,6 +42,9 @@
     <ul class="list-group">
         {%for b in messages%}
         <li class="list-group-item flex-column align-items-start mt-3 shadow p-3 ">
+            {% if b.author_id != id %}
+                <p>REBLEAT</p>
+            {% endif %}
             <p><b>{{b.title}}</b></p>
             <p class="mb-1">{{b.content}}</p>
             <div class="btn-group" role="group" aria-label="Basic example">
