@@ -377,8 +377,7 @@ def home_user():
                 friends_bleats.append((friends_name[ele.author_id], ele))
 
         # Sort it from youngest to oldest
-        sorted(friends_bleats,
-               key=lambda friends_bleats: friends_bleats[1].date)
+        sorted(friends_bleats, key=lambda friends_bleats: friends_bleats[1].date)
         friends_bleats.reverse()
 
         # Like_index Creation
@@ -656,17 +655,26 @@ def profile():
 
         current_user = User.query.filter_by(id=cur_id).first()
         # current_user = session["user_index"].get(cur_id)
-        bleats = current_user.bleats  # use the foreign key bleats.author to User
-        # get all his bleats
+        bleats = current_user.bleats  # use the foreign key bleats.author to User and get all his bleats
 
         messages = LinkedList()
 
         for b in bleats:
             messages.insert_at_end(b)
 
-        #Add les rebleats en parcourant la db
+        #Add rebleat
+        rebleat = Rebleat.query.all()
 
-        return render_template("profile.html", my_account=True, email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list()[::-1])
+        for rb in rebleat:
+            if rb.rebleater_id == cur_id:
+                bleat = Bleat.query.filter_by(id=rb.bleat_id).first()
+                messages.insert_at_end(bleat)
+
+        messages = messages.to_list()
+        messages = sorted(messages, key=lambda messages: messages.date)
+
+        return render_template("profile.html", my_account=True, email=current_user.email, nb_friends=nb_friends, id=current_user.id,
+                                username=current_user.username, location=current_user.location, messages=messages)
 
     if request.method == "POST":
         # search function only for your own bleats or your friends
