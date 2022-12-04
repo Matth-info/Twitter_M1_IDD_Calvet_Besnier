@@ -64,9 +64,9 @@ class Bleat(db.Model):
         "User.id", ondelete='CASCADE'), nullable=False)
     like = db.Column(db.Integer)
     retweet = db.Column(db.Integer)
-    # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
+    # for now it's just a counter, we will do a response list
     reply = db.Column(db.Integer)
-    date = db.Column(db.String(256))
+    date = db.Column(db.String(256), nullable=False)
 
     def serialize(self):
         return {"title": self.title, "content": self.content}
@@ -80,6 +80,22 @@ class Relationship(db.Model):
         "User.id", ondelete="CASCADE"), nullable=False, primary_key=True)
     date = db.Column(db.String(256), nullable=False)
     pending = db.Column(db.Boolean, nullable=False)
+
+
+class Like(db.Model):
+    __tablename__ = "Like"
+    bleat_id = db.Column(db.Integer, db.ForeignKey(
+        Bleat.id, ondelete='CASCADE'), nullable=False, primary_key=True)  # Bleat liked
+    liker_id = db.Column(db.Integer, db.ForeignKey(
+        User.id, ondelete='CASCADE'), nullable=False, primary_key=True)  # User who liked
+
+
+class Rebleat(db.Model):
+    __tablename__ = "Rebleat"
+    bleat_id = db.Column(db.Integer, db.ForeignKey(
+        Bleat.id, ondelete='CASCADE'), nullable=False, primary_key=True)  # Bleat rebleat
+    rebleater_id = db.Column(db.Integer, db.ForeignKey(
+        User.id, ondelete='CASCADE'), nullable=False, primary_key=True)  # User who rebleated
 
 
 def hash_password(pwd):
@@ -107,22 +123,21 @@ def generate_users(n=100):
 
         new_user = User(username=username, email=email,
                         pwd=pwd, location=location[l])
-        print(new_user.username + "lives in " + new_user.location)
         db.session.add(new_user)
         # commit to the database
         db.session.commit()
     return "success"
 
 
-def generate_bleat(n=1000):
+def generate_bleat(n=400):
     size = len(User.query.all())
     for i in range(n):
         author_id = random.randint(1, size - 1)
         if User.query.filter_by(id=author_id).first():
             content = lorem.words(10)
             title = lorem.words(1)
-            like = random.randint(0, 100)
-            retweet = random.randint(0, 10)
+            like = 0
+            retweet = 0
             reply = 0  # Pour l'instant c'est juste un compteur, on en fera une liste de reponse
             date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             new_bleat = Bleat(title=title, content=content, author_id=author_id,
@@ -132,16 +147,16 @@ def generate_bleat(n=1000):
     return "success"
 
 
-def generate_relationship(n=200):
+def generate_relationship(n=1000):
     size = len(User.query.all())
     for i in range(n):
         id1, id2 = random.randint(1, size-1), random.randint(1, size-1)
-        if not db.session.query(Relationship).filter(and_(Relationship.userID1 == id1, Relationship.userID2 == id2)).first():
-            if id1 != id2 and User.query.filter_by(id=id1).first() and User.query.filter_by(id=id2).first():
+        if id1 != id2:
+            if not (db.session.query(Relationship).filter(and_(Relationship.userID1 == id1, Relationship.userID2 == id2)).first() or db.session.query(Relationship).filter(and_(Relationship.userID1 == id2, Relationship.userID2 == id1)).first()):
+
                 p = bool(random.randint(0, 1))
                 date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if p is True:
-
                     db.session.add(Relationship(
                         userID1=id1, userID2=id2, date=date, pending=p))
                     db.session.add(Relationship(
@@ -150,6 +165,32 @@ def generate_relationship(n=200):
                     db.session.add(Relationship(
                         userID1=id1, userID2=id2, date=date, pending=p))
                 db.session.commit()
+    return "success"
+
+
+def generate_likes_and_rebleat(n=1000):
+    size_user = len(User.query.all())
+    size_bleat = len(Bleat.query.all())
+    for i in range(n):
+        id_user, id_bleat = random.randint(
+            1, size_user-1), random.randint(1, size_bleat-1)
+        if not db.session.query(Bleat).filter(and_(Bleat.author_id == id_user, Bleat.id == id_bleat)).first():
+            if not db.session.query(Like).filter(and_(Like.bleat_id == id_bleat, Like.liker_id == id_user)).first():
+                # the user like the post
+                db.session.query(Bleat).filter_by(
+                    id=id_bleat).update({'like': Bleat.like + 1})
+                db.session.add(Like(bleat_id=id_bleat, liker_id=id_user))
+
+        id_user, id_bleat = random.randint(
+            1, size_user-1), random.randint(1, size_bleat-1)
+        if not db.session.query(Bleat).filter(and_(Bleat.author_id == id_user, Bleat.id == id_bleat)).first():
+            if not db.session.query(Rebleat).filter(and_(Rebleat.rebleater_id == id_user, Rebleat.bleat_id == id_bleat)).first():
+                db.session.query(Bleat).filter_by(id=id_bleat).update(
+                    {'retweet': Bleat.retweet + 1})
+                db.session.add(
+                    Rebleat(bleat_id=id_bleat, rebleater_id=id_user))
+        db.session.commit()
+
     return "success"
 
 
@@ -191,11 +232,7 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    # print(generate_users())
-    # print(generate_bleat())
-    # print(generate_relationship())
-    G_p, G_np = show_friends()
-    nx.draw(G_p, pos=nx.random_layout(G_p, seed=64), with_labels=True)
-    plt.show()
-    nx.draw(G_np, pos=nx.random_layout(G_np, seed=64), with_labels=True)
-    plt.show()
+    print(generate_users())
+    print(generate_bleat())
+    print(generate_relationship())
+    print(generate_likes_and_rebleat())

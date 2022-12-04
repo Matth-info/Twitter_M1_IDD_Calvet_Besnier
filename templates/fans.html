@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}<title>Fans</title>{% endblock %}
+
+
+{% block main %}
+
+{% if response|length %}
+<h2 class="text-center"><b>{{request}}</b></h2>
+<div class="row">
+    <div class="col p-3">
+        <ul class="list-group">
+            {%for r in response%}
+            <li class="list-group-item flex-column align-items-start mt-3 shadow">
+                <a href="/profile/{{r['id']}}">@{{r["name"]}}</a> ({{r["email"]}}) from {{r["location"]}}
+            </li>
+            {%endfor%}
+        </ul>
+    </div>
+    <div class="col p-3">
+        <h3>Quote of the day</h3>
+        <p class="text-justify font-italic">"Success is not measured by what you accomplish,
+            but by the opposition you have encountered,
+            and the courage with which you have maintained
+            the struggle against overwhelming odds."
+        </p>
+        <a href="https://en.wikipedia.org/wiki/Orison_Swett_Marden" class="button-lnk">Orison Swett Marden</a>
+    </div>
+</div>
+{%else%}
+<h1 class="font-weight-bold p-1 text-xl-center">Don't be upset, It will work very soon</h1>
+<img src="https://www.brainyquote.com/photos_tr/en/b/brucelee/394186/brucelee1-2x.jpg">
+{%endif%}
+{% endblock %}
