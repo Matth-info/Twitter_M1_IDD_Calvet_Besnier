@@ -657,6 +657,8 @@ def profile():
         for b in bleats:
             messages.insert_at_end(b)
 
+        #Add les rebleats en parcourant la db
+
         return render_template("profile.html", my_account=True, email=current_user.email, nb_friends=nb_friends, username=current_user.username, location=current_user.location, messages=messages.to_list()[::-1])
 
     if request.method == "POST":
@@ -739,7 +741,7 @@ def profile_user(ID):
 
         for t in bleats:
             messages.insert_at_end(t)
-        #Faut rajouter les rebleats
+
 
         return render_template("profile.html", my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list())
 
