@@ -36,7 +36,15 @@
             Delete account
         </button>
     </div>
+    {% else %}
+    <form action="/user/friend_request/{{id}}" method="post">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="btn btn-outline-primary" type="submit" name="friend_request">Send a friend
+                request</button>
+        </div>
+    </form>
     {% endif %}
+
 
     {%include 'flash.html' %}
     <ul class="list-group">
