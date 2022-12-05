@@ -37,7 +37,7 @@
                         <div class="p-1">
                             <div class="col">
 
-                                {%if (current_user not in like_index[b.id]) %}
+                                {%if (b.id not in like_index[current_user]) %}
                                 <form>
                                     <label for="like">{{b.like}}</label>
                                     <input class="like" onclick="updateLike_btn(this, '{{b.id}}')" type="button"
@@ -72,7 +72,7 @@
                         <!--REBLEAT-->
                         <div class="p-1">
                             <div class="col">
-                                {%if (current_user not in rb_index[b.id]) %}
+                                {%if (b.id not in rb_index[current_user]) %}
                                 <form>
                                     <label for="rebleat">{{b.retweet}}</label>
                                     <input class="rebleat" id="rebleat" onclick="updateRB_btn(this, '{{b.id}}')"
