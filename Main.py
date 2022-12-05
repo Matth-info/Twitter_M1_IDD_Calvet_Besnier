@@ -376,29 +376,37 @@ def home_user():
             if ele.author_id in friends_id:
                 friends_bleats.append((friends_name[ele.author_id], ele))
 
-        # Sort it from youngest to oldest
-        sorted(friends_bleats, key=lambda friends_bleats: friends_bleats[1].date)
-        friends_bleats.reverse()
-
         # Like_index Creation
         like_bd = Like.query.all()
         like_index = dict()
 
-        for l in like_bd:  # For each bleat wwe have all the user who liked it
-            if like_index.get(l.bleat_id):
-                like_index[l.bleat_id].append(l.liker_id)
+        for l in like_bd:  # For each user we have all the bleat the liked
+            if like_index.get(l.liker_id):
+                like_index[l.liker_id].append(l.bleat_id)
             else:
-                like_index[l.bleat_id] = [l.liker_id]
+                like_index[l.liker_id] = [l.bleat_id]
 
         # Rebleat_index Creation
         rb_bd = Rebleat.query.all()
         rb_index = dict()
 
         for r in rb_bd:
-            if rb_index.get(r.bleat_id):
-                rb_index[r.bleat_id].append(r.rebleater_id)
+            if rb_index.get(r.rebleater_id):
+                rb_index[r.rebleater_id].append(r.bleat_id)
             else:
-                rb_index[r.bleat_id] = [r.rebleater_id]
+                rb_index[r.rebleater_id] = [r.bleat_id]
+
+        #Add rebleat
+        for f_id in friends_name.keys():
+            if rb_index.get(f_id):
+                for b in rb_index.get(f_id):
+                    bl = Bleat.query.filter(Bleat.id == b).first()
+                    author = User.query.filter(User.id==bl.author_id).first()
+                    friends_bleats.append((author.username, bl))
+
+        # Sort it from youngest to oldest
+        friends_bleats = sorted(friends_bleats, key=lambda friends_bleats: friends_bleats[1].date)
+        friends_bleats.reverse()
 
         return render_template("home_page.html", messages=friends_bleats, like_index=like_index,
                                rb_index=rb_index,
@@ -671,7 +679,7 @@ def profile():
                 messages.insert_at_end(bleat)
 
         messages = messages.to_list()
-        messages = sorted(messages, key=lambda messages: messages.date)
+        messages = sorted(messages, key=lambda messages: messages.date)[::-1]
 
         return render_template("profile.html", my_account=True, email=current_user.email, nb_friends=nb_friends, id=current_user.id,
                                 username=current_user.username, location=current_user.location, messages=messages)
