@@ -1,6 +1,7 @@
 # Script to fill the database
 
 
+from data_struct import LinkedList
 from sqlalchemy import and_
 from lorem_text import lorem
 import random
@@ -18,7 +19,7 @@ from data_struct import *
 import networkx as nx
 import matplotlib.pyplot as plt
 from sqlalchemy import PrimaryKeyConstraint, CheckConstraint
-
+from Levenshtein import distance
 
 # app
 app = Flask(__name__)
@@ -232,7 +233,17 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    print(generate_users())
-    print(generate_bleat())
-    print(generate_relationship())
-    print(generate_likes_and_rebleat())
+    # print(generate_users())
+    # print(generate_bleat())
+    # print(generate_relationship())
+    # print(generate_likes_and_rebleat())
+
+    l1 = dict()
+    l1["hello"] = LinkedList()
+    l1["hello"].insert_beginning(1)
+    l1["hello"].insert_beginning(2)
+    l1["hello"].insert_beginning(4)
+    del l1["hello"]
+    a = l1["hello"]
+
+    a.print_ll()
