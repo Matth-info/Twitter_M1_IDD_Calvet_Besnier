@@ -98,7 +98,7 @@ class Rebleat(db.Model):
         User.id, ondelete='CASCADE'), nullable=False, primary_key=True)  # User who rebleated
 
 
-@app.route("/")  # testing root
+@app.route("/")  # Home root
 def home():
     current_user = User.query.filter_by(id=session.get("current_user")).first()
 
@@ -119,14 +119,12 @@ def create_user():
     # add the user to the database
     db.session.add(new_user)
     # commit to the database
-    db.session.commit()  # take the entire session and update the
-    # database.
+    db.session.commit()  # take the entire session and update the database.
     return jsonify({"message": "User created"}), 200
 
 
 @app.route("/users/<int:ID>", methods=["GET", "POST", "DELETE"])
 def users(ID):
-    # users = User.query.all()
 
     if (request.method == "GET"):
         user = User.query.filter_by(id=ID).first()
@@ -145,8 +143,7 @@ def users(ID):
         # add the user to the database
         db.session.add(new_user)
         # commit to the database
-        db.session.commit()  # take the entire session and update the
-        # database.
+        db.session.commit()  # take the entire session and update the database.
         return jsonify({"message": "User created"}), 200
     else:
         user_del = User.query.filter_by(id=ID).first()
@@ -365,8 +362,8 @@ def home_user():
         while len(list(friends_name.keys())) != len(friends_id):
             for e in users:
                 if e.id in friends_id:
-                    friends_name[e.id] = e.username
-        # friends_name dictionary with (user.id) : user.username
+                    friends_name[e.id] = e
+        # friends_name dictionary with (user.id) : user
 
         # Recup friend's bleat
 
@@ -402,7 +399,7 @@ def home_user():
                 for b in rb_index.get(f_id):
                     bl = Bleat.query.filter(Bleat.id == b).first()
                     author = User.query.filter(User.id==bl.author_id).first()
-                    friends_bleats.append((author.username, bl))
+                    friends_bleats.append((author, bl))
 
         # Sort it from youngest to oldest
         friends_bleats = sorted(friends_bleats, key=lambda friends_bleats: friends_bleats[1].date)
