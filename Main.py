@@ -1,3 +1,4 @@
+from collections import deque
 import os
 import matplotlib.pyplot as plt
 from sqlalchemy import update
@@ -18,6 +19,7 @@ from data_struct import *
 import networkx as nx
 import random
 from collections import Counter
+from Levenshtein import distance
 # app
 app = Flask(__name__)
 app.secret_key = "012345"
@@ -332,15 +334,15 @@ def home_user():
             word_counter[w] += 1
             if not d_search.get(w):
                 d_search[w] = LinkedList()  # Access O(n) Insertion O(1)
-                d_search[w].insert_at_end(bleat)
+                d_search[w].insert_beginning(bleat)
             else:
-                d_search[w].insert_at_end(bleat)
+                d_search[w].insert_beginning(bleat)
 
         for w in bleat.content.split():
             word_counter[w] += 1
             if not d_search.get(w):
                 d_search[w] = LinkedList()
-                d_search[w].insert_at_end(bleat)
+                d_search[w].insert_beginning(bleat)
             else:
                 d_search[w].insert_at_end(bleat)
     most_used_word = [u[0] for u in word_counter.most_common(20)]
@@ -393,16 +395,17 @@ def home_user():
             else:
                 rb_index[r.rebleater_id] = [r.bleat_id]
 
-        #Add rebleat
+        # Add rebleat
         for f_id in friends_name.keys():
             if rb_index.get(f_id):
                 for b in rb_index.get(f_id):
                     bl = Bleat.query.filter(Bleat.id == b).first()
-                    author = User.query.filter(User.id==bl.author_id).first()
+                    author = User.query.filter(User.id == bl.author_id).first()
                     friends_bleats.append((author, bl))
 
         # Sort it from youngest to oldest
-        friends_bleats = sorted(friends_bleats, key=lambda friends_bleats: friends_bleats[1].date)
+        friends_bleats = sorted(
+            friends_bleats, key=lambda friends_bleats: friends_bleats[1].date)
         friends_bleats.reverse()
 
         return render_template("home_page.html", messages=friends_bleats, like_index=like_index,
@@ -428,15 +431,34 @@ def home_user():
         if len(user_found.keys()) > 0:
             user_bool = True
 
-        # get it in O(1) all bleat
+        """# get it in O(1) all bleat
         if d_search.get(word):
             # transform our linkedList to list
             bleat_found = d_search[word].to_list()
             w = word
         else:
             bleat_found = []
+        """
+        if d_search.get(word):
+            bleat_found = d_search[word]
+        else:
+            bleat_found = LinkedList()
 
-        return render_template("search.html", most_used_word=most_used_word, user_bool=user_bool, word_s=w, user_found=user_found, b_list=bleat_found, user_index=user_index)
+            for w in d_search.keys():
+                if abs(len(w) - len(word)) < 3:
+                    if distance(w, word) <= 2:  # compute the Levenshtein distance between 2 words
+                        if bleat_found.head == None:
+                            bleat_found.head = d_search[w].head
+                        else:
+                            bleat_found = LinkedList.concatenate(
+                                bleat_found, d_search[w])
+
+        bleat_found = bleat_found.to_list()
+        bleat_found = sorted(
+            bleat_found, key=lambda ele: ele.date)
+        bleat_found.reverse()
+
+        return render_template("search.html", most_used_word=most_used_word, user_bool=user_bool, word_s=word, user_found=user_found, b_list=bleat_found, user_index=user_index)
 
 
 """function to get the friends of a given user"""
@@ -660,14 +682,15 @@ def profile():
 
         current_user = User.query.filter_by(id=cur_id).first()
         # current_user = session["user_index"].get(cur_id)
-        bleats = current_user.bleats  # use the foreign key bleats.author to User and get all his bleats
+        # use the foreign key bleats.author to User and get all his bleats
+        bleats = current_user.bleats
 
         messages = LinkedList()
 
         for b in bleats:
             messages.insert_at_end(b)
 
-        #Add rebleat
+        # Add rebleat
         rebleat = Rebleat.query.all()
 
         for rb in rebleat:
@@ -679,7 +702,7 @@ def profile():
         messages = sorted(messages, key=lambda messages: messages.date)[::-1]
 
         return render_template("profile.html", my_account=True, email=current_user.email, nb_friends=nb_friends, id=current_user.id,
-                                username=current_user.username, location=current_user.location, messages=messages)
+                               username=current_user.username, location=current_user.location, messages=messages)
 
     if request.method == "POST":
         # search function only for your own bleats or your friends
@@ -762,7 +785,6 @@ def profile_user(ID):
         for t in bleats:
             messages.insert_at_end(t)
 
-
         return render_template("profile.html", id=ID, my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list())
 
 
@@ -839,7 +861,7 @@ def like(bleat_id):
         return {}
 
 
-@app.route("/rebleat/<bleat_id>", methods=["POST", "DELETE"])
+@app.route("/rebleat/<int:bleat_id>", methods=["POST", "DELETE"])
 def rebleat(bleat_id):
     if request.method == "POST":
 
