@@ -26,9 +26,9 @@
             </div>
 
             <ul class="list-group">
-                {%for name,b in messages%}
+                {%for author,b in messages%}
                 <li class="list-group-item list-group-item-action flex-column align-items-start mt-3 shadow p-3 ">
-                    <p><b>@{{name}}</b></p>
+                    <a href="/profile/{{author.id}}"><b>@{{author.username}}</b></a>
                     <p class="mb-1"><b>{{b.title}}</b></p>
                     <p class="mb-1">{{b.content}}</p>
                     <small>{{b.date}}</small>
