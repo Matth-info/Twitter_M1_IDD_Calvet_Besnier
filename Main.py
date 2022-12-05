@@ -763,7 +763,7 @@ def profile_user(ID):
             messages.insert_at_end(t)
 
 
-        return render_template("profile.html", my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list())
+        return render_template("profile.html", id=ID, my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list())
 
 
 @app.route("/user/remove_bleat/<int:ID>", methods=["POST"])
