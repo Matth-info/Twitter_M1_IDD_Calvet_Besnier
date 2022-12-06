@@ -51,8 +51,8 @@
         {%for b in messages%}
         <li class="list-group-item flex-column align-items-start mt-3 shadow p-3 ">
             {% if b.author_id != id %}
-                <p>REBLEAT</p>
-            {% endif %}
+            <p>Rebleat</p>
+            {%endif%}
             <p><b>{{b.title}}</b></p>
             <p class="mb-1">{{b.content}}</p>
             <div class="btn-group" role="group" aria-label="Basic example">
@@ -77,7 +77,12 @@
                 </form>
             </div>
             <div class="text-left">
+                {% if b.author_id != id %}
+                <small>posted it at {{b.date}}</small>
+                <small>click <a href="/profile/{{b.author_id}}"> here </a> to see the original author</small>
+                {%else%}
                 <small>You posted it at {{b.date}}</small>
+                {%endif%}
                 {% if my_account %}
                 <div class="d-grid gap-1 d-md-flex justify-content-md-end  pull-right">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{b['id']}}">
