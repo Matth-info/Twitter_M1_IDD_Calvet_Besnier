@@ -6,21 +6,35 @@ Goal : The goal of this project is to recreate some Twitter features using API t
 the best data structures to store and process the data depending on the features that we choose to implement.  
 
 How does it work ? 
-In the data base there are some accounts you can use for testing features: 
-Id of connection
-mail and password 
-S15@gmail.com    Sa
-J97@gmail.com    Js
+In the database there are some accounts you can use for testing features: 
+Go to the signup feature 
 
-Home : see the bleats of the friends'bleats
-Profile : see your bleats
-Post a Bleat 
-Log out 
-Signin
-Signup
-/user/friends
-Home : access to the bleats of friends and search words in bleats or profile in Bleatter User database
+name - mail - password 
 
-The developement process is still ongoing.
+Linda	L67@gmail.com - La
+Samantha	S88@gmail.com - Sa
+William	W92@gmail.com - Wm
+Oscar	O98@gmail.com - Or
+Jason	J85@gmail.com - Jn
+Monica	M6@gmail.com - Ma
+Sharon	S49@gmail.com - Sn
+David	D9@gmail.com - Dd
+Jesus	J41@gmail.com - Js
+Kathy	K53@gmail.com - Ky
+ 
+IMPORTANT : We use several package that you need to install to execute correctly the program 
+
+numpy
+scipy 
+datetime
+hashlib
+networkx 
+random
+Levenshtein 
+
+if you want to execute the python file script_data (creating a new table) you need to uncomment the main function and install the following package 
+
+names_dataset
+lorem_text
 
 Bonus : You should be able to hear a goat bleatting when you push the button submit in the post a bleat
