@@ -3,7 +3,6 @@ import os
 import matplotlib.pyplot as plt
 from sqlalchemy import update
 import numpy as np
-from scipy.sparse import csr_matrix
 import scipy as sp
 from data_struct import LinkedList
 from sqlite3 import Connection as SQLite3Connection
@@ -345,7 +344,7 @@ def home_user():
                 d_search[w].insert_beginning(bleat)
             else:
                 d_search[w].insert_at_end(bleat)
-    most_used_word = [u[0] for u in word_counter.most_common(20)]
+    most_used_word = [u for u in word_counter.most_common(20)]
 
     if request.method == "GET":
 
@@ -431,17 +430,12 @@ def home_user():
         if len(user_found.keys()) > 0:
             user_bool = True
 
-        """# get it in O(1) all bleat
-        if d_search.get(word):
-            # transform our linkedList to list
-            bleat_found = d_search[word].to_list()
-            w = word
-        else:
-            bleat_found = []
-        """
+        # if the word is well written and found it return the list of bleats containing the word
         if d_search.get(word):
             bleat_found = d_search[word]
         else:
+            # otherwise, the list of bleats containing a word near to the searched word (by Levenstein distance)
+            # is return
             bleat_found = LinkedList()
 
             for w in d_search.keys():
