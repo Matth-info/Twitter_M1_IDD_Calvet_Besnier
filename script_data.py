@@ -195,37 +195,30 @@ def generate_likes_and_rebleat(n=1000):
     return "success"
 
 
-def show_friends():
+def question_4():
+    r_table = Relationship.query.all()
+    r_count = Relationship.query.filter_by(pending=True).count()
+    follow_relationship = []
+    for r in r_table:
+        follow_relationship.append((r.userID1, r.userID2))
 
-    users = User.query.all()  # load the users in the memory
-    # load all the relationship data in the memory
-    relationships = Relationship.query.all()
-    # implement a hash function with direct chaining to store the relation ship
+    temp = set(follow_relationship) & {(b, a) for a, b in follow_relationship}
+    """ consider only one tuple per each symetric relationships """
+    res = {(a, b) for a, b in temp if a < b}
+    return res
 
-    # hash map storing all users accessible by their id
-    U = dict()
-    for u in users:
-        U[u.id] = {"id": u.id,
-                   "username": u.username,
-                   "email": u.email,
-                   "location": u.location}
 
-    G_p = nx.DiGraph()
-    G_np = nx.DiGraph()
+def question_5(user_id):
+    graph_rel = nx.DiGraph()
+    r_waiting = Relationship.query.filter_by(pending=False)
+    for r in r_waiting:
+        graph_rel.add_edge(r.userID1, r.userID2)
 
-    for r in relationships:
-        if r.pending == True:
-            G_p.add_edge(r.userID1, r.userID2)
-        else:
-            G_np.add_edge(r.userID1, r.userID2)
-
-    # pos = nx.spring_layout(G,seed=63)
-    # nx.draw(G, pos=nx.random_layout(G, seed=64), arrows=True, with_labels=True)
-    # nx.draw_networkx_edge_labels(
-        # G, pos = nx.random_layout(G, seed=64), edge_labels = edge_lab)
-    # plt.savefig("static/graph.png", format="PNG")
-
-    return G_p, G_np
+    s = set()
+    for p in graph_rel.predecessors(user_id):
+        for pp in graph_rel.predecessors(p):
+            s.add(pp)
+    return s
 
 
 if __name__ == "__main__":
@@ -238,12 +231,4 @@ if __name__ == "__main__":
     # print(generate_relationship())
     # print(generate_likes_and_rebleat())
 
-    l1 = dict()
-    l1["hello"] = LinkedList()
-    l1["hello"].insert_beginning(1)
-    l1["hello"].insert_beginning(2)
-    l1["hello"].insert_beginning(4)
-    del l1["hello"]
-    a = l1["hello"]
-
-    a.print_ll()
+    print(question_5(36))
