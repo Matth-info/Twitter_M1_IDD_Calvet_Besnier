@@ -83,20 +83,22 @@
             {%endif%}
         </div>
         <div class="col col-lg-2 rounded">
-            <h3><b>Most used words</b></h3>
+            <h4><b>Trend for you</b></h4>
             <ul class="list-group align-items-center ">
-                {%for w in most_used_word %}
+                {%for w,n in most_used_word %}
                 <li
                     class="list-group-item list-group-item-action flex-column align-items-start shadow bg-warning text-dark">
                     <form action="/home_page" method="post">
                         <input type="hidden" class="form-control mr-sm-2" type="search" name="search" value="{{w}}">
-                        <button class="link-button" type="submit">#{{w}}</button>
+                        <button class="link-button" type="submit"><b>#{{w}}</b>
+                        </button>
                     </form>
+                    <small>{{n}} Bleats</small>
                 </li>
                 {%endfor%}
             </ul>
-
         </div>
+
     </div>
 </div>
 {% endblock %}
