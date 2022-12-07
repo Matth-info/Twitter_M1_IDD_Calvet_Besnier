@@ -37,14 +37,13 @@
             <div class="container text-center">
                 <div class="d-inline-flex p-2">
                     <h3>&#128542; No User found </h3>
-
                 </div>
             </div>
             {%endif%}
 
             {% if b_list|length %}
-            <div class="text-center">
-                <h3>&#128512; Bleats containing the word "{{word_s}}"</h3>
+            <div class="text-center p-3">
+                <h3>&#128512; Bleats containing the word "{{word_s}}" or something close</h3>
             </div>
             {%for ele in b_list %}
             <ul class="list-group">
@@ -82,7 +81,7 @@
             </div>
             {%endif%}
         </div>
-        
+
 
     </div>
 </div>
