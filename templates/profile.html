@@ -31,18 +31,27 @@
 
     </div>
     {% if my_account %}
+    <!-- if you are connected you can delete your account -->
     <div class="text-right p-3">
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#delete_profile">
             Delete account
         </button>
     </div>
     {% else %}
+
+    {% if state=="F" %}
     <form action="/user/friend_request/{{id}}" method="post">
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button class="btn btn-outline-primary" type="submit" name="friend_request">Send a friend
-                request</button>
+            <button class="btn btn-outline-primary" type="submit" name="friend_request">Send a friend request</button>
         </div>
     </form>
+    {% else %}
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button class="btn btn-outline-ligth">{{state}}
+        </button>
+    </div>
+    {%endif%}
+
     {% endif %}
 
 
