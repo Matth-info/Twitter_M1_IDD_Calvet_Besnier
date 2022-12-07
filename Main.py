@@ -666,7 +666,7 @@ def remove_friend(ID):
 
 @ app.route("/my_profile", methods=["GET", "POST"])
 def profile():
-    g.search = "profile"
+    g.search = "profile"  # give the possibility of searching a word or a use in the nav bar
     if request.method == "GET":
         cur_id = session.get("current_user")
         users = User.query.all()
@@ -766,8 +766,27 @@ def profile_user(ID):
 
         user_searched = User.query.filter_by(id=ID).first()
 
-        nb_friends = Relationship.query.filter(
-            (Relationship.userID1 == ID) & (Relationship.pending == True)).count()
+        rel_list = dict()
+        for rel in Relationship.query.all():
+            if not rel.userID1 in rel_list.keys():
+                rel_list[rel.userID1] = dict()
+                rel_list[rel.userID1][True] = set()
+                rel_list[rel.userID1][False] = set()
+            else:
+                rel_list[rel.userID1][rel.pending].add(rel.userID2)
+
+        nb_friends = len(rel_list[ID][True])
+
+        # What about the relationship between this user and the current user ?
+        id_cur = session.get("current_user")
+        state = "F"
+        if id_cur in rel_list[ID][True]:
+            state = "Friend"
+        elif (id_cur in rel_list[ID][False]):
+            state = "He / She sent you a friend request"
+        else:
+            if ID in rel_list[id_cur][False]:
+                state = "Friend request already sent"
 
         username = user_searched.username
         email = user_searched.email
@@ -779,7 +798,7 @@ def profile_user(ID):
         for t in bleats:
             messages.insert_at_end(t)
 
-        return render_template("profile.html", id=ID, my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list())
+        return render_template("profile.html", id=ID, my_account=False, email=email, nb_friends=nb_friends, username=username, location=location, messages=messages.to_list(), state=state)
 
 
 @app.route("/user/remove_bleat/<int:ID>", methods=["POST"])
