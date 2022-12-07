@@ -5,7 +5,7 @@ from data_struct import LinkedList
 from sqlalchemy import and_
 from lorem_text import lorem
 import random
-from names_dataset import NameDataset
+#from names_dataset import NameDataset
 import sys
 from sqlite3 import Connection as SQLite3Connection
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
@@ -205,7 +205,19 @@ def question_4():
     temp = set(follow_relationship) & {(b, a) for a, b in follow_relationship}
     """ consider only one tuple per each symetric relationships """
     res = {(a, b) for a, b in temp if a < b}
-    return res
+
+    email_to_id_mapping = dict()
+    users = User.query.all()
+    for u in users:
+        email_to_id_mapping[u.email] = u.id
+
+    id_to_email_mapping = dict((id, email) for email, id in email_to_id_mapping)
+
+    email_symetric_relationship = []
+    for i, j in res:
+        email_symetric_relationship.append((id_to_email_mapping[i], id_to_email_mapping[j]))
+
+    return email_symetric_relationship
 
 
 def question_5(user_id):
@@ -225,10 +237,12 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-
+    app.debug = True
+    app.env = "development"
+    app.run(host="localhost", port="5000")
     # print(generate_users())
     # print(generate_bleat())
     # print(generate_relationship())
     # print(generate_likes_and_rebleat())
 
-    print(question_5(36))
+    print(question_4())
