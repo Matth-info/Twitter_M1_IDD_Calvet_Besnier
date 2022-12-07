@@ -5,7 +5,7 @@ from data_struct import LinkedList
 from sqlalchemy import and_
 from lorem_text import lorem
 import random
-#from names_dataset import NameDataset
+from names_dataset import NameDataset
 import sys
 from sqlite3 import Connection as SQLite3Connection
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
@@ -113,19 +113,21 @@ def generate_users(n=100):
     F = nd.get_top_names(n=50, gender='Female', country_alpha2='US')["US"]["F"]
     for i in range(n):
         g = random.randint(0, 1)
-        n = random.randint(0, len(F)-1)
+        e = random.randint(0, len(F)-1)
         l = random.randint(0, len(location)-1)
         if g == 0:
-            username = M[n]
+            username = M[e]
         else:
-            username = F[n]
-        email = str(username[0] + str(random.randint(1, 100)) + "@gmail.com")
+            username = F[e]
+        email = str(username[0] + username[1]) + \
+            str(random.randint(1, n)) + "@gmail.com"
         pwd = hash_password(str(username[0] + username[len(username)-1]))
 
+        # if the email does not exist yet
         if not User.query.filter_by(email=email).first():
             new_user = User(username=username, email=email,
                             pwd=pwd, location=location[l])
-        db.session.add(new_user)
+            db.session.add(new_user)
         # commit to the database
         db.session.commit()
     return "success"
@@ -233,14 +235,17 @@ def question_5(user_id):
     return s
 
 
+def generate_database():
+
+    print(generate_users())
+    print(generate_bleat())
+    print(generate_relationship())
+    print(generate_likes_and_rebleat())
+
+
 if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-
-    # print(generate_users())
-    # print(generate_bleat())
-    # print(generate_relationship())
-    # print(generate_likes_and_rebleat())
 
     print(question_4())
