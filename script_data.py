@@ -43,7 +43,7 @@ class User(db.Model):
     __tablename__ = "User"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(24))
-    email = db.Column(db.String(64))
+    email = db.Column(db.String(64), unique=True)
     pwd = db.Column(db.String(64))
     location = db.Column(db.String(64))
     bleats = db.relationship(
@@ -122,8 +122,9 @@ def generate_users(n=100):
         email = str(username[0] + str(random.randint(1, 100)) + "@gmail.com")
         pwd = hash_password(str(username[0] + username[len(username)-1]))
 
-        new_user = User(username=username, email=email,
-                        pwd=pwd, location=location[l])
+        if not User.query.filter_by(email=email).first():
+            new_user = User(username=username, email=email,
+                            pwd=pwd, location=location[l])
         db.session.add(new_user)
         # commit to the database
         db.session.commit()
@@ -206,16 +207,15 @@ def question_4():
     """ consider only one tuple per each symetric relationships """
     res = {(a, b) for a, b in temp if a < b}
 
-    email_to_id_mapping = dict()
+    id_to_email_mapping = dict()
     users = User.query.all()
     for u in users:
-        email_to_id_mapping[u.email] = u.id
-
-    id_to_email_mapping = dict((id, email) for email, id in email_to_id_mapping)
+        id_to_email_mapping[u.id] = u.email
 
     email_symetric_relationship = []
-    for i, j in res:
-        email_symetric_relationship.append((id_to_email_mapping[i], id_to_email_mapping[j]))
+    for (i, j) in res:
+        email_symetric_relationship.append(
+            (id_to_email_mapping[i], id_to_email_mapping[j]))
 
     return email_symetric_relationship
 
@@ -237,9 +237,7 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-    app.debug = True
-    app.env = "development"
-    app.run(host="localhost", port="5000")
+
     # print(generate_users())
     # print(generate_bleat())
     # print(generate_relationship())
