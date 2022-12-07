@@ -821,11 +821,11 @@ def delete_a_user_bleat(ID):
         bleat_removed = Bleat.query.filter(
             (Bleat.author_id == cur_id) & (Bleat.id == ID)).first()
         if bleat_removed is None:
-            flash("You are not allowed to delete this bleat or it does not exist")
+            flash("You are not allowed to delete this bleat, you are not the original author, go to your Home Page and remove your rebleat from there")
             return redirect(url_for("profile"))
         else:
-            flash("The Bleat entitled " + bleat_removed.title +
-                  " has been successfully remove from Bleatter")
+            flash("The Bleat entitled '" + bleat_removed.title +
+                  "' has been successfully remove from Bleatter")
             db.session.delete(bleat_removed)
             db.session.commit()
             return redirect(url_for("profile"))
