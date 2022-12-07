@@ -3,63 +3,76 @@
 {% block style %}{% endblock %}
 
 {% block main %}
-<div class="container-fluid">
+<div class="container">
     <h1> Friends of {{name}} </h1>
     {%include 'flash.html' %}
-    <ul>
-        <h3>Current list of friends on Bleatter</h3>
-        <span class="badge bg-primary rounded-pill"> {{F|length}}</span>
-        {% for ele in F %}
-        <li class="list-group-item" aria-current="true">
-            <form action="/user/remove_friend/{{ele['id']}}" method="post">
-                @{{ele["username"]}} ( {{ele["email"]}} ) from {{ele["location"]}}
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button class="btn btn-outline-danger" type="submit" name="accept">Remove</button>
-                </div>
+    <div class="row">
+        <div class="col">
+            <ul>
+                <h3>Current list of friends on Bleatter <span class="badge bg-primary rounded-pill"> {{F|length}}</span>
+                </h3>
 
-            </form>
-            {%endfor%}
-        </li>
-    </ul>
+                {% for ele in F %}
+                <li class="list-group-item" aria-current="true">
+                    <p>@{{ele["username"]}} ( {{ele["email"]}} ) from {{ele["location"]}}</p><span class="pull-right">
+                        <form action="/user/remove_friend/{{ele['id']}}" method="post">
+                            <div class="d-grid d-md-flex justify-content-md-end">
+                                <button class="btn btn-outline-danger" type="submit" name="accept">Remove</button>
+                            </div>
+                        </form>
+                    </span>
+                    {%endfor%}
+                </li>
+            </ul>
+        </div>
+        <div class="col">
+            <ul>
+                <h3>Don't lose hope, they will accept you very soon ! <span class="badge bg-primary rounded-pill">
+                        {{I|length}}</span></h3>
 
-    <ul>
-        <h3>Don't lose hope, they will accept you very soon !</h3>
-        <span class="badge bg-primary rounded-pill"> {{I|length}}</span>
-        {% for ele in I %}
-        <li class="list-group-item " aria-current="true">
-            @{{ele["username"]}}( {{ele["email"]}} ) from {{ele["location"]}}</li>
+                {% for ele in I %}
+                <li class="list-group-item " aria-current="true">
+                    @{{ele["username"]}}( {{ele["email"]}} ) from {{ele["location"]}}</li>
 
-        {%endfor%}
-    </ul>
-    <ul>
-        <h3>Some users want to be your friends</h3>
-        <span class="badge bg-primary rounded-pill"> {{W|length}}</span>
-        {% for ele in W %}
-        <li class="list-group-item" aria-current="true">
-            <form action="/user/friends/{{ele['id']}}" method="post">
-                @{{ele["username"]}} ( {{ele["email"]}} ) from {{ele["location"]}}
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button class="btn btn-outline-primary" type="submit" name="accept">Accept</button>
-                </div>
-            </form>
-        </li>
-        {%endfor%}
-    </ul>
-    <ul>
-        <h3>Friend suggestions</h3>
-        {% for ele in FF %}
-        <li class="list-group-item" aria-current="true">
-            <form action="/user/friend_request/{{ele['id']}}" method="post">
-                @{{ele["username"]}} ( {{ele["email"]}} ) from {{ele["location"]}}
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button class="btn btn-outline-primary" type="submit" name="friend_request">Send a friend
-                        request</button>
-                </div>
-            </form>
+                {%endfor%}
+            </ul>
+        </div>
+        <div class="w-100"></div>
+        <div class="col">
+            <ul>
+                <h3>Some users want to be your friends <span class="badge bg-primary rounded-pill"> {{W|length}}</span>
+                </h3>
 
-        </li>
-        {%endfor%}
-    </ul>
+                {% for ele in W %}
+                <li class="list-group-item" aria-current="true">
+                    <form action="/user/friends/{{ele['id']}}" method="post">
+                        @{{ele["username"]}} ( {{ele["email"]}} ) from {{ele["location"]}}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-outline-primary" type="submit" name="accept">Accept</button>
+                        </div>
+                    </form>
+                </li>
+                {%endfor%}
+            </ul>
+        </div>
+        <div class="col">
+            <ul>
+                <h3>Friend suggestions <span class="badge bg-primary rounded-pill"> {{FF|length}}</span></h3>
+                {% for ele in FF %}
+                <li class="list-group-item" aria-current="true">
+                    <form action="/user/friend_request/{{ele['id']}}" method="post">
+                        @{{ele["username"]}} ( {{ele["email"]}} ) from {{ele["location"]}}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-outline-primary" type="submit" name="friend_request">Send a friend
+                                request</button>
+                        </div>
+                    </form>
+
+                </li>
+                {%endfor%}
+            </ul>
+        </div>
+    </div>
 </div>
 
 
