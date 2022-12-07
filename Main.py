@@ -452,7 +452,7 @@ def home_user():
             bleat_found, key=lambda ele: ele.date)
         bleat_found.reverse()
 
-        return render_template("search.html", most_used_word=most_used_word, user_bool=user_bool, word_s=word, user_found=user_found, b_list=bleat_found, user_index=user_index)
+        return render_template("search.html", user_bool=user_bool, word_s=word, user_found=user_found, b_list=bleat_found, user_index=user_index)
 
 
 """function to get the friends of a given user"""
@@ -717,7 +717,7 @@ def profile():
         for ele in relationship__current_user:
             friend_index[ele.userID2] = users_dict[ele.userID2]
             if users_dict[ele.userID2].username.lower() == word.lower():
-                path = "/profile" + str(ele.id)
+                path = "/profile/" + str(ele.userID2)
                 user_found[ele] = path
 
         user_bool = False
@@ -756,7 +756,17 @@ def profile():
         else:
             bleat_found = []
 
-        return render_template("search.html", user_bool=user_bool, word=w, user_found=user_found, b_list=bleat_found, user_index=friend_index)
+        #Find your friends
+        users = User.query.all()
+        user_index = {}
+        user_found = {}
+        for ele in users:
+            user_index[ele.id] = ele  # Create user_index
+
+            if ele.username.lower() == word.lower():  # Search if word user exist
+                user_found[ele] = str(ele.id)
+
+        return render_template("search.html", user_bool=user_bool, word_s=w, user_found=user_found, b_list=bleat_found, user_index=friend_index)
 
 
 @app.route("/profile/<int:ID>", methods=["GET"])
