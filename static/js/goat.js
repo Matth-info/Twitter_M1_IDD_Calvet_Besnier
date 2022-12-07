@@ -8,7 +8,7 @@ function sleep(milliseconds) {
 
 function goat() {
   var myAudio = new Audio("son.wav")
-  sleep(3000)
+  sleep(1000)
   myAudio.play()
 }
 
