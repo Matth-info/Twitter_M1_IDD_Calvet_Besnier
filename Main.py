@@ -43,7 +43,7 @@ class User(db.Model):
     __tablename__ = "User"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(24))
-    email = db.Column(db.String(64))
+    email = db.Column(db.String(64), unique=True)
     pwd = db.Column(db.String(64))
     location = db.Column(db.String(64))
     bleats = db.relationship(
@@ -756,7 +756,7 @@ def profile():
         else:
             bleat_found = []
 
-        #Find your friends
+        # Find your friends
         users = User.query.all()
         user_index = {}
         user_found = {}
