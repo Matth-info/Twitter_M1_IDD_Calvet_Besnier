@@ -343,7 +343,7 @@ def home_user():
                 d_search[w] = LinkedList()
                 d_search[w].insert_beginning(bleat)
             else:
-                d_search[w].insert_at_end(bleat)
+                d_search[w].insert_beginning(bleat)
     most_used_word = [u for u in word_counter.most_common(20)]
 
     if request.method == "GET":
